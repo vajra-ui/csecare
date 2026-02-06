@@ -13,10 +13,24 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Check if force recreation is requested
+    let forceRecreate = false;
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        forceRecreate = body?.force === true;
+      } catch {
+        // No body or invalid JSON, continue
+      }
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminEmail = Deno.env.get("SUPER_ADMIN_EMAIL")!;
     const adminPassword = Deno.env.get("SUPER_ADMIN_PASSWORD")!;
+
+    console.log("Admin email:", adminEmail);
+    console.log("Admin password length:", adminPassword?.length);
 
     if (!adminEmail || !adminPassword) {
       return new Response(
@@ -33,7 +47,24 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Check if admin already exists
+    // If force recreate, delete existing admin first
+    if (forceRecreate) {
+      console.log("Force recreation requested, deleting existing admin...");
+      const { data: existingRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "ADMIN");
+      
+      if (existingRoles) {
+        for (const role of existingRoles) {
+          await supabaseAdmin.from("user_roles").delete().eq("user_id", role.user_id);
+          await supabaseAdmin.from("profiles").delete().eq("user_id", role.user_id);
+          await supabaseAdmin.auth.admin.deleteUser(role.user_id);
+        }
+      }
+    }
+
+    // Check if admin already exists with the correct email
     const { data: existingRoles } = await supabaseAdmin
       .from("user_roles")
       .select("id, user_id")
@@ -41,10 +72,31 @@ Deno.serve(async (req) => {
       .limit(1);
 
     if (existingRoles && existingRoles.length > 0) {
-      return new Response(
-        JSON.stringify({ message: "Admin already exists", exists: true }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      // Check if the existing admin has the same email
+      const existingUserId = existingRoles[0].user_id;
+      const { data: existingUser } = await supabaseAdmin.auth.admin.getUserById(existingUserId);
+      
+      if (existingUser?.user?.email === adminEmail) {
+        // Update the password to ensure it matches the secret
+        await supabaseAdmin.auth.admin.updateUserById(existingUserId, {
+          password: adminPassword,
+        });
+        
+        return new Response(
+          JSON.stringify({ message: "Admin password updated", exists: true, updated: true }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Different email - delete old admin and create new one
+      console.log("Replacing existing admin with new credentials...");
+      
+      // Delete old role and profile
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", existingUserId);
+      await supabaseAdmin.from("profiles").delete().eq("user_id", existingUserId);
+      
+      // Delete old auth user
+      await supabaseAdmin.auth.admin.deleteUser(existingUserId);
     }
 
     // Create admin user
