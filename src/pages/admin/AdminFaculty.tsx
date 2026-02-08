@@ -198,13 +198,13 @@ export default function AdminFaculty() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold flex items-center gap-2">
-              <Users className="h-8 w-8 text-secondary" />
+            <h1 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <Users className="h-6 w-6 md:h-8 md:w-8 text-secondary" />
               Faculty Management
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               Add faculty, assign tutors, and manage teaching staff
             </p>
           </div>

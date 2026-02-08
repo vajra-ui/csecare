@@ -240,17 +240,17 @@ export default function AdminStudents() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-info" />
+            <h1 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <GraduationCap className="h-6 w-6 md:h-8 md:w-8 text-info" />
               Student Management
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               Add, manage, and view student records
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <label>
               <input
                 type="file"

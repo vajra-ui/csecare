@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { MobileSidebar } from './MobileSidebar';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -46,70 +47,79 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     navigate('/');
   };
 
+  const sidebarContent = (
+    <aside className="h-full gradient-dark text-sidebar-foreground flex flex-col">
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="bg-white p-1.5 rounded-lg">
+            <PaavaiLogo size="sm" />
+          </div>
+          <div>
+            <h2 className="font-display font-semibold text-sm">Admin Portal</h2>
+            <p className="text-xs text-sidebar-foreground/70">CSE Department</p>
+          </div>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1 py-4">
+        <nav className="px-3 space-y-1">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                className={cn(
+                  'w-full justify-start gap-3 font-normal',
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                )}
+                onClick={() => navigate(item.path)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+
+      <div className="p-4 border-t border-sidebar-border">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="h-9 w-9 rounded-full bg-sidebar-primary flex items-center justify-center">
+            <span className="text-sm font-medium text-sidebar-primary-foreground">A</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{user?.name || 'Administrator'}</p>
+            <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-sidebar-foreground/80 hover:text-destructive hover:bg-destructive/10"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </Button>
+      </div>
+    </aside>
+  );
+
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Sidebar */}
-      <aside className="w-64 gradient-dark text-sidebar-foreground flex flex-col">
-        <div className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-1.5 rounded-lg">
-              <PaavaiLogo size="sm" />
-            </div>
-            <div>
-              <h2 className="font-display font-semibold text-sm">Admin Portal</h2>
-              <p className="text-xs text-sidebar-foreground/70">CSE Department</p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+      {/* Mobile sidebar */}
+      <MobileSidebar>{sidebarContent}</MobileSidebar>
 
-        <ScrollArea className="flex-1 py-4">
-          <nav className="px-3 space-y-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Button
-                  key={item.path}
-                  variant="ghost"
-                  className={cn(
-                    'w-full justify-start gap-3 font-normal',
-                    isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                  )}
-                  onClick={() => navigate(item.path)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              );
-            })}
-          </nav>
-        </ScrollArea>
-
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-9 w-9 rounded-full bg-sidebar-primary flex items-center justify-center">
-              <span className="text-sm font-medium text-sidebar-primary-foreground">A</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name || 'Administrator'}</p>
-              <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 text-sidebar-foreground/80 hover:text-destructive hover:bg-destructive/10"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
-      </aside>
+      {/* Desktop sidebar */}
+      <div className="hidden md:block w-64 flex-shrink-0">
+        {sidebarContent}
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <div className="p-6">{children}</div>
+        <div className="p-4 md:p-6">{children}</div>
       </main>
     </div>
   );
