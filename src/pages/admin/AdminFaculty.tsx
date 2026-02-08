@@ -8,6 +8,8 @@ import {
   Search,
   Loader2,
   UserCheck,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -38,6 +40,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Table,
   TableBody,
@@ -73,6 +85,7 @@ interface Faculty {
   current_subjects: string[] | null;
   section: string | null;
   is_tutor: boolean;
+  user_id: string | null;
   created_at: string;
 }
 
@@ -83,6 +96,10 @@ export default function AdminFaculty() {
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deletingFaculty, setDeletingFaculty] = useState<Faculty | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const form = useForm<FacultyFormData>({
     resolver: zodResolver(facultySchema),
@@ -95,6 +112,10 @@ export default function AdminFaculty() {
       section: 'none',
       isTutor: false,
     },
+  });
+
+  const editForm = useForm<FacultyFormData>({
+    resolver: zodResolver(facultySchema),
   });
 
   useEffect(() => {
@@ -112,11 +133,7 @@ export default function AdminFaculty() {
       setFaculty(data || []);
     } catch (error) {
       console.error('Error fetching faculty:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch faculty',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to fetch faculty', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -166,33 +183,204 @@ export default function AdminFaculty() {
     }
   };
 
-  const toggleTutor = async (facultyMember: Faculty) => {
+  const openEditDialog = (f: Faculty) => {
+    setEditingFaculty(f);
+    editForm.reset({
+      name: f.name,
+      dob: f.dob,
+      qualification: f.qualification || '',
+      yearsOfExperience: f.years_of_experience || 0,
+      currentSubjects: f.current_subjects?.join(', ') || '',
+      section: (f.section as FacultyFormData['section']) || 'none',
+      isTutor: f.is_tutor || false,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const onEditSubmit = async (data: FacultyFormData) => {
+    if (!editingFaculty) return;
+    setCreating(true);
     try {
+      const subjects = data.currentSubjects
+        ? data.currentSubjects.split(',').map(s => s.trim()).filter(s => s)
+        : [];
+
       const { error } = await supabase
         .from('faculty')
-        .update({ is_tutor: !facultyMember.is_tutor })
-        .eq('id', facultyMember.id);
+        .update({
+          name: data.name,
+          dob: data.dob,
+          qualification: data.qualification || null,
+          years_of_experience: data.yearsOfExperience,
+          current_subjects: subjects,
+          section: data.section === 'none' ? null : (data.section as any),
+          is_tutor: data.isTutor,
+        })
+        .eq('id', editingFaculty.id);
 
       if (error) throw error;
 
-      toast({
-        title: facultyMember.is_tutor ? 'Tutor Removed' : 'Tutor Assigned',
-        description: `${facultyMember.name} is ${facultyMember.is_tutor ? 'no longer' : 'now'} a tutor.`,
-      });
-
+      toast({ title: 'Faculty Updated', description: `${data.name} has been updated.` });
+      setIsEditDialogOpen(false);
+      setEditingFaculty(null);
       fetchFaculty();
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to update tutor status',
+        description: error instanceof Error ? error.message : 'Failed to update faculty',
         variant: 'destructive',
       });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingFaculty) return;
+    setDeleting(true);
+    try {
+      // Delete from faculty table (auth user remains but can't log in without a record)
+      const { error } = await supabase
+        .from('faculty')
+        .delete()
+        .eq('id', deletingFaculty.id);
+
+      if (error) throw error;
+
+      toast({ title: 'Faculty Deleted', description: `${deletingFaculty.name} has been removed.` });
+      setDeletingFaculty(null);
+      fetchFaculty();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete faculty',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
   const filteredFaculty = faculty.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     f.faculty_id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const FacultyFormFields = ({ formInstance, onSubmitFn, submitLabel, isSubmitting }: {
+    formInstance: typeof form;
+    onSubmitFn: (data: FacultyFormData) => void;
+    submitLabel: string;
+    isSubmitting: boolean;
+  }) => (
+    <Form {...formInstance}>
+      <form onSubmit={formInstance.handleSubmit(onSubmitFn)} className="space-y-4">
+        <FormField
+          control={formInstance.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl><Input placeholder="Dr. Jane Smith" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={formInstance.control}
+          name="dob"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Birth</FormLabel>
+              <FormControl><Input type="date" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={formInstance.control}
+            name="qualification"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Qualification</FormLabel>
+                <FormControl><Input placeholder="Ph.D, M.Tech" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={formInstance.control}
+            name="yearsOfExperience"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Experience (Years)</FormLabel>
+                <FormControl><Input type="number" min={0} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <FormField
+          control={formInstance.control}
+          name="currentSubjects"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Current Subjects</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Data Structures, Algorithms (comma-separated)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={formInstance.control}
+          name="section"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assigned Section</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger><SelectValue placeholder="Select section" /></SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">No Section</SelectItem>
+                  <SelectItem value="CSE A">CSE A</SelectItem>
+                  <SelectItem value="CSE B">CSE B</SelectItem>
+                  <SelectItem value="CSE C">CSE C</SelectItem>
+                  <SelectItem value="CSE D">CSE D</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={formInstance.control}
+          name="isTutor"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Assign as Tutor</FormLabel>
+                <FormDescription>Tutors can manage student records and approve OD requests</FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end gap-2 pt-4">
+          <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); setIsEditDialogOpen(false); }}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {submitLabel}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 
   return (
@@ -211,153 +399,49 @@ export default function AdminFaculty() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Faculty
+                <Plus className="mr-2 h-4 w-4" /> Add Faculty
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Faculty</DialogTitle>
-                <DialogDescription>
-                  Faculty ID will be auto-generated. Login uses Faculty ID + DOB.
-                </DialogDescription>
+                <DialogDescription>Faculty ID will be auto-generated. Login uses Faculty ID + DOB.</DialogDescription>
               </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Dr. Jane Smith" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="qualification"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Qualification</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Ph.D, M.Tech" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="yearsOfExperience"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Experience (Years)</FormLabel>
-                          <FormControl>
-                            <Input type="number" min={0} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="currentSubjects"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Subjects</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Data Structures, Algorithms, DBMS (comma-separated)"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="section"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Assigned Section</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select section" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">No Section</SelectItem>
-                            <SelectItem value="CSE A">CSE A</SelectItem>
-                            <SelectItem value="CSE B">CSE B</SelectItem>
-                            <SelectItem value="CSE C">CSE C</SelectItem>
-                            <SelectItem value="CSE D">CSE D</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isTutor"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Assign as Tutor</FormLabel>
-                          <FormDescription>
-                            Tutors can manage student records and approve OD requests
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={creating}>
-                      {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Faculty
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+              <FacultyFormFields formInstance={form} onSubmitFn={onSubmit} submitLabel="Create Faculty" isSubmitting={creating} />
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Search and Table */}
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Faculty</DialogTitle>
+              <DialogDescription>Update faculty details for {editingFaculty?.name}</DialogDescription>
+            </DialogHeader>
+            <FacultyFormFields formInstance={editForm} onSubmitFn={onEditSubmit} submitLabel="Save Changes" isSubmitting={creating} />
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!deletingFaculty} onOpenChange={(open) => !open && setDeletingFaculty(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Faculty</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <strong>{deletingFaculty?.name}</strong> ({deletingFaculty?.faculty_id})? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -380,60 +464,56 @@ export default function AdminFaculty() {
               </div>
             ) : filteredFaculty.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                {faculty.length === 0 
-                  ? 'No faculty added yet. Add your first faculty member above.'
-                  : 'No faculty match your search.'}
+                {faculty.length === 0 ? 'No faculty added yet.' : 'No faculty match your search.'}
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Faculty ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Qualification</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Section</TableHead>
-                    <TableHead>Tutor</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFaculty.map((f) => (
-                    <TableRow key={f.id}>
-                      <TableCell className="font-mono text-sm">{f.faculty_id}</TableCell>
-                      <TableCell className="font-medium">{f.name}</TableCell>
-                      <TableCell>{f.qualification || '-'}</TableCell>
-                      <TableCell>{f.years_of_experience} years</TableCell>
-                      <TableCell>
-                        {f.section ? (
-                          <Badge variant="outline">{f.section}</Badge>
-                        ) : (
-                          '-'
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {f.is_tutor ? (
-                          <Badge className="bg-success text-success-foreground">
-                            <UserCheck className="h-3 w-3 mr-1" />
-                            Tutor
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Faculty</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleTutor(f)}
-                        >
-                          {f.is_tutor ? 'Remove Tutor' : 'Make Tutor'}
-                        </Button>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Faculty ID</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="hidden md:table-cell">Qualification</TableHead>
+                      <TableHead className="hidden md:table-cell">Experience</TableHead>
+                      <TableHead className="hidden sm:table-cell">Section</TableHead>
+                      <TableHead>Tutor</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredFaculty.map((f) => (
+                      <TableRow key={f.id}>
+                        <TableCell className="font-mono text-sm">{f.faculty_id}</TableCell>
+                        <TableCell className="font-medium">{f.name}</TableCell>
+                        <TableCell className="hidden md:table-cell">{f.qualification || '-'}</TableCell>
+                        <TableCell className="hidden md:table-cell">{f.years_of_experience} yrs</TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          {f.section ? <Badge variant="outline">{f.section}</Badge> : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {f.is_tutor ? (
+                            <Badge className="bg-success text-success-foreground">
+                              <UserCheck className="h-3 w-3 mr-1" /> Tutor
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">Faculty</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(f)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => setDeletingFaculty(f)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
