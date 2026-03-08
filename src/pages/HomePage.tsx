@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, GraduationCap, Users, Crown, BookOpen, Building2 } from 'lucide-react';
+import { ShieldCheck, GraduationCap, Users, Crown, BookOpen, Building2, Sparkles, ArrowRight, Cpu } from 'lucide-react';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
@@ -14,104 +14,130 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="gradient-hero text-white relative">
+    <div className="min-h-screen bg-background relative">
+      {/* Ambient grid */}
+      <div className="fixed inset-0 grid-pattern opacity-40 pointer-events-none" />
+
+      {/* Hero Header */}
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0 gradient-hero" />
+        <div className="absolute inset-0 grid-pattern opacity-20" />
+        
+        {/* Floating orbs */}
+        <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-neon-cyan/10 blur-3xl animate-float" />
+        <div className="absolute bottom-10 right-20 w-40 h-40 rounded-full bg-neon-purple/10 blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-10 right-1/3 w-24 h-24 rounded-full bg-neon-pink/10 blur-3xl animate-float" style={{ animationDelay: '0.8s' }} />
+
         <div className="absolute top-4 right-4 z-10">
           <ThemeToggle />
         </div>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="bg-white p-3 rounded-2xl shadow-lg animate-scale-in">
-              <PaavaiLogo size="xl" />
+        
+        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="relative animate-scale-in">
+              <div className="absolute inset-0 bg-neon-cyan/20 rounded-2xl blur-xl animate-glow" />
+              <div className="relative bg-card/90 backdrop-blur-xl p-4 rounded-2xl border border-border/50 shadow-neon">
+                <PaavaiLogo size="xl" />
+              </div>
             </div>
-            <div className="animate-slide-up">
-              <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">
+            <div className="animate-slide-up space-y-3">
+              <div className="flex items-center justify-center gap-2">
+                <Cpu className="h-4 w-4 text-neon-cyan" />
+                <span className="text-neon-cyan font-body text-xs tracking-[0.3em] uppercase">CSE Department</span>
+              </div>
+              <h1 className="font-display text-3xl md:text-5xl font-bold text-primary-foreground tracking-wider">
                 Paavai Engineering College
               </h1>
-              <p className="text-lg md:text-xl opacity-90 font-medium">
-                CSE Academic Management System
+              <p className="text-lg md:text-xl text-primary-foreground/80 font-body font-light">
+                Academic Management System
               </p>
-              <p className="text-sm opacity-75 mt-1">
-                Autonomous Institution | Approved by AICTE | Affiliated to Anna University
+              <p className="text-xs text-primary-foreground/50 font-body tracking-wider">
+                Autonomous Institution • AICTE Approved • Anna University
               </p>
             </div>
           </div>
         </div>
-        <svg className="w-full h-16 -mb-1" viewBox="0 0 1440 54" fill="none" preserveAspectRatio="none">
-          <path d="M0 22L60 16.7C120 11 240 1 360 0.7C480 1 600 11 720 22C840 33 960 44 1080 44C1200 44 1320 33 1380 27.5L1440 22V54H1380C1320 54 1200 54 1080 54C960 54 840 54 720 54C600 54 480 54 360 54C240 54 120 54 60 54H0V22Z" fill="hsl(var(--background))" />
+
+        {/* Wave divider */}
+        <svg className="w-full h-20 -mb-1 relative z-10" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+          <path d="M0 40C240 10 480 70 720 40C960 10 1200 70 1440 40V80H0V40Z" fill="hsl(var(--background))" />
         </svg>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 -mt-4">
+      <main className="container mx-auto px-4 py-8 -mt-4 relative z-10">
         <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            {/* Admin Roles */}
-            <div>
-              <h2 className="font-display text-2xl font-semibold mb-4 text-center lg:text-left">
-                Administration
-              </h2>
+          <div className="lg:col-span-2 space-y-10">
+            {/* Administration */}
+            <section className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="h-8 w-1 rounded-full bg-gradient-to-b from-neon-cyan to-neon-purple" />
+                <h2 className="font-display text-xl font-semibold tracking-wider">Administration</h2>
+              </div>
               <div className="grid sm:grid-cols-3 gap-4">
                 <RoleCard
-                  icon={<Crown className="h-8 w-8" />}
+                  icon={<Crown className="h-7 w-7" />}
                   title="Principal"
                   description="Institutional oversight & governance"
                   onClick={() => handleAdminLogin('Principal')}
                   variant="admin"
                 />
                 <RoleCard
-                  icon={<BookOpen className="h-8 w-8" />}
+                  icon={<BookOpen className="h-7 w-7" />}
                   title="HOD"
                   description="Head of CSE Department"
                   onClick={() => handleAdminLogin('HOD')}
                   variant="admin"
                 />
                 <RoleCard
-                  icon={<Building2 className="h-8 w-8" />}
+                  icon={<Building2 className="h-7 w-7" />}
                   title="COE Cell"
                   description="Controller of Examinations"
                   onClick={() => handleAdminLogin('COE Cell')}
                   variant="admin"
                 />
               </div>
-            </div>
+            </section>
 
-            {/* Faculty & Student */}
-            <div>
-              <h2 className="font-display text-2xl font-semibold mb-4 text-center lg:text-left">
-                Portal Access
-              </h2>
+            {/* Portal Access */}
+            <section className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="h-8 w-1 rounded-full bg-gradient-to-b from-neon-pink to-secondary" />
+                <h2 className="font-display text-xl font-semibold tracking-wider">Portal Access</h2>
+              </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <RoleCard
-                  icon={<Users className="h-8 w-8" />}
+                  icon={<Users className="h-7 w-7" />}
                   title="Faculty"
                   description="Teaching staff & tutors"
                   onClick={() => navigate('/login/faculty')}
                   variant="faculty"
                 />
                 <RoleCard
-                  icon={<GraduationCap className="h-8 w-8" />}
+                  icon={<GraduationCap className="h-7 w-7" />}
                   title="Student"
                   description="CSE department students"
                   onClick={() => navigate('/login/student')}
                   variant="student"
                 />
               </div>
-            </div>
+            </section>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 animate-slide-up" style={{ animationDelay: '300ms' }}>
             <AnnouncementPanel />
           </div>
         </div>
       </main>
 
-      <footer className="border-t mt-auto">
+      <footer className="border-t border-border/50 mt-auto relative z-10">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <p>© 2024 Paavai Engineering College. All rights reserved.</p>
-            <p>Department of Computer Science & Engineering</p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground font-body tracking-wider">
+            <p>© 2025 Paavai Engineering College. All rights reserved.</p>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3 w-3 text-neon-cyan" />
+              <p>Department of Computer Science & Engineering</p>
+            </div>
           </div>
         </div>
       </footer>
