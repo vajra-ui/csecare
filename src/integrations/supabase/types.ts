@@ -412,12 +412,57 @@ export type Database = {
         }
         Relationships: []
       }
+      student_documents: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_name: string
+          file_url: string
+          id: string
+          student_id: string
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          student_id: string
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          student_id?: string
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_documents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           created_at: string
           dob: string
           id: string
           name: string
+          profile_photo_url: string | null
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
@@ -431,6 +476,7 @@ export type Database = {
           dob: string
           id?: string
           name: string
+          profile_photo_url?: string | null
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
@@ -444,6 +490,7 @@ export type Database = {
           dob?: string
           id?: string
           name?: string
+          profile_photo_url?: string | null
           register_number?: string
           roll_number?: string
           section?: Database["public"]["Enums"]["section_type"]
