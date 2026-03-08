@@ -65,7 +65,11 @@ export function AdminLogin() {
     }
   };
 
+  const handleTransitionComplete = useCallback(() => navigate('/admin'), [navigate]);
+
   return (
+    <>
+    {showTransition && <LoginTransition roleName={adminRole} onComplete={handleTransitionComplete} />}
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         <Card className="border-2">
