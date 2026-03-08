@@ -55,6 +55,7 @@ import StudentAchievements from "@/pages/student/StudentAchievements";
 import StudentGPACalc from "@/pages/student/StudentGPACalc";
 import StudentExamTimetable from "@/pages/student/StudentExamTimetable";
 import StudentFeedback from "@/pages/student/StudentFeedback";
+import StudentMessages from "@/pages/student/StudentMessages";
 
 const queryClient = new QueryClient();
 
