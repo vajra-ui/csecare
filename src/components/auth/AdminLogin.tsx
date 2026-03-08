@@ -33,6 +33,7 @@ export function AdminLogin() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
   const adminRole = localStorage.getItem('admin_view_role') || 'Admin';
 
   const form = useForm<AdminLoginForm>({
