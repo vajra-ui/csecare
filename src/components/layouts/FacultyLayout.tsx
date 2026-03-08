@@ -41,6 +41,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
       { icon: Phone, label: 'Parent Comms', path: '/faculty/parent-communication' },
       { icon: MessageSquare, label: 'Mentoring', path: '/faculty/mentoring' },
     ] : []),
+    { icon: Mail, label: 'Messages', path: '/faculty/messages' },
   ];
 
   const handleLogout = async () => {
