@@ -24,6 +24,7 @@ import AdminAnnouncements from "@/pages/admin/AdminAnnouncements";
 import AdminODRequests from "@/pages/admin/AdminODRequests";
 import AdminAuditLogs from "@/pages/admin/AdminAuditLogs";
 import AdminReports from "@/pages/admin/AdminReports";
+import AdminRiskAnalysis from "@/pages/admin/AdminRiskAnalysis";
 import AdminSettings from "@/pages/admin/AdminSettings";
 
 // Faculty Pages
