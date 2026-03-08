@@ -7,6 +7,7 @@ import {
   Users,
   FileText,
   LogOut,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/faculty' },
+    { icon: User, label: 'Profile', path: '/faculty/profile' },
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
     ...(isTutor
