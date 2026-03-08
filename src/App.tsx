@@ -50,6 +50,10 @@ import StudentOD from "@/pages/student/StudentOD";
 import StudentAttendance from "@/pages/student/StudentAttendance";
 import StudentProgress from "@/pages/student/StudentProgress";
 import StudentUpload from "@/pages/student/StudentUpload";
+import StudentAchievements from "@/pages/student/StudentAchievements";
+import StudentGPACalc from "@/pages/student/StudentGPACalc";
+import StudentExamTimetable from "@/pages/student/StudentExamTimetable";
+import StudentFeedback from "@/pages/student/StudentFeedback";
 
 const queryClient = new QueryClient();
 
