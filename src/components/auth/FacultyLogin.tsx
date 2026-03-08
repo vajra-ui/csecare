@@ -52,7 +52,7 @@ export function FacultyLogin() {
         title: `Welcome, ${user.name}!`,
         description: user.isTutor ? 'Logged in as Tutor' : 'Logged in as Faculty',
       });
-      navigate('/faculty');
+      setShowTransition(true);
     } catch (error) {
       toast({
         title: 'Login Failed',
