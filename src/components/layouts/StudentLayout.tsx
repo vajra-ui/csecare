@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/student' },
   { icon: User, label: 'Profile', path: '/student/profile' },
   { icon: Calendar, label: 'Timetable', path: '/student/timetable' },
+  { icon: BookOpen, label: 'Assignments', path: '/student/assignments' },
   { icon: Upload, label: 'Uploads', path: '/student/upload' },
   { icon: TrendingUp, label: 'Progress', path: '/student/progress' },
   { icon: FileText, label: 'OD Submission', path: '/student/od' },
