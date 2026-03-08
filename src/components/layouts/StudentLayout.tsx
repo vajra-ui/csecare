@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
 import { useTheme } from 'next-themes';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface StudentLayoutProps {
   children: ReactNode;
@@ -29,6 +30,7 @@ const navItems = [
   { icon: Calculator, label: 'GPA Calculator', path: '/student/gpa-calculator' },
   { icon: ClipboardList, label: 'Exam Timetable', path: '/student/exam-timetable' },
   { icon: Star, label: 'Feedback', path: '/student/feedback' },
+  { icon: Mail, label: 'Messages', path: '/student/messages' },
 ];
 
 export function StudentLayout({ children }: StudentLayoutProps) {
@@ -89,6 +91,7 @@ export function StudentLayout({ children }: StudentLayoutProps) {
           </div>
         </div>
         <div className="flex gap-2">
+          <NotificationBell />
           <Button
             variant="ghost"
             size="icon"

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare,
+  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare, Mail,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
 import { useTheme } from 'next-themes';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface FacultyLayoutProps {
   children: ReactNode;
@@ -40,6 +41,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
       { icon: Phone, label: 'Parent Comms', path: '/faculty/parent-communication' },
       { icon: MessageSquare, label: 'Mentoring', path: '/faculty/mentoring' },
     ] : []),
+    { icon: Mail, label: 'Messages', path: '/faculty/messages' },
   ];
 
   const handleLogout = async () => {
@@ -96,6 +98,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
           </div>
         </div>
         <div className="flex gap-2">
+          <NotificationBell />
           <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

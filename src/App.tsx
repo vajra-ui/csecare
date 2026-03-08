@@ -40,6 +40,7 @@ import FacultyNotes from "@/pages/faculty/FacultyNotes";
 import FacultyLeave from "@/pages/faculty/FacultyLeave";
 import FacultyParentComm from "@/pages/faculty/FacultyParentComm";
 import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
+import FacultyMessages from "@/pages/faculty/FacultyMessages";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
@@ -54,6 +55,7 @@ import StudentAchievements from "@/pages/student/StudentAchievements";
 import StudentGPACalc from "@/pages/student/StudentGPACalc";
 import StudentExamTimetable from "@/pages/student/StudentExamTimetable";
 import StudentFeedback from "@/pages/student/StudentFeedback";
+import StudentMessages from "@/pages/student/StudentMessages";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +110,7 @@ function AppRoutes() {
       <Route path="/faculty/leave" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyLeave /></ProtectedRoute>} />
       <Route path="/faculty/parent-communication" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyParentComm /></ProtectedRoute>} />
       <Route path="/faculty/mentoring" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyMentoring /></ProtectedRoute>} />
+      <Route path="/faculty/messages" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyMessages /></ProtectedRoute>} />
       
       {/* Student Routes */}
       <Route path="/student" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDashboard /></ProtectedRoute>} />
@@ -122,6 +125,7 @@ function AppRoutes() {
       <Route path="/student/gpa-calculator" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentGPACalc /></ProtectedRoute>} />
       <Route path="/student/exam-timetable" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentExamTimetable /></ProtectedRoute>} />
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
+      <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
