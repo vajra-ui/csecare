@@ -1,13 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Calendar,
-  ClipboardCheck,
-  Users,
-  FileText,
-  LogOut,
-  User,
+  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,6 +11,7 @@ import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
+import { useTheme } from 'next-themes';
 
 interface FacultyLayoutProps {
   children: ReactNode;
@@ -27,7 +22,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
-
+  const { theme, setTheme } = useTheme();
   const isTutor = user?.isTutor || false;
 
   const navItems = [
@@ -35,20 +30,15 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: User, label: 'Profile', path: '/faculty/profile' },
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
-    ...(isTutor
-      ? [
-          { icon: Users, label: 'My Students', path: '/faculty/students' },
-          { icon: FileText, label: 'OD Requests', path: '/faculty/od-requests' },
-        ]
-      : []),
+    ...(isTutor ? [
+      { icon: Users, label: 'My Students', path: '/faculty/students' },
+      { icon: FileText, label: 'OD Requests', path: '/faculty/od-requests' },
+    ] : []),
   ];
 
   const handleLogout = async () => {
     await logout();
-    toast({
-      title: 'Logged out',
-      description: 'You have been successfully logged out.',
-    });
+    toast({ title: 'Logged out', description: 'You have been successfully logged out.' });
     navigate('/');
   };
 
@@ -74,9 +64,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
                 variant="ghost"
                 className={cn(
                   'w-full justify-start gap-3 font-normal',
-                  isActive
-                    ? 'bg-secondary/50 text-secondary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  isActive ? 'bg-secondary/50 text-secondary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 )}
                 onClick={() => navigate(item.path)}
               >
@@ -91,30 +79,25 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
       <div className="p-4 border-t">
         <div className="flex items-center gap-3 mb-3">
           <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
-            <span className="text-sm font-medium text-secondary-foreground">
-              {user?.name?.charAt(0) || 'F'}
-            </span>
+            <span className="text-sm font-medium text-secondary-foreground">{user?.name?.charAt(0) || 'F'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium truncate">{user?.name}</p>
-              {isTutor && (
-                <Badge variant="secondary" className="text-xs">
-                  Tutor
-                </Badge>
-              )}
+              {isTutor && <Badge variant="secondary" className="text-xs">Tutor</Badge>}
             </div>
             <p className="text-xs text-muted-foreground truncate">{user?.facultyId}</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          </Button>
+          <Button variant="ghost" className="flex-1 justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" /> Sign Out
+          </Button>
+        </div>
       </div>
     </aside>
   );
@@ -122,9 +105,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">
       <MobileSidebar>{sidebarContent}</MobileSidebar>
-      <div className="hidden md:block w-64 flex-shrink-0">
-        {sidebarContent}
-      </div>
+      <div className="hidden md:block w-64 flex-shrink-0">{sidebarContent}</div>
       <main className="flex-1 overflow-auto">
         <div className="p-4 md:p-6">{children}</div>
       </main>
