@@ -32,6 +32,7 @@ export function AdminLogin() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const adminRole = localStorage.getItem('admin_view_role') || 'Admin';
 
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
@@ -80,9 +81,9 @@ export function AdminLogin() {
               <PaavaiLogo size="lg" />
             </div>
             <div>
-              <CardTitle className="font-display text-2xl">Admin Login</CardTitle>
+              <CardTitle className="font-display text-2xl">{adminRole} Login</CardTitle>
               <CardDescription>
-                Access the administrative portal
+                Access the {adminRole.toLowerCase()} portal
               </CardDescription>
             </div>
           </CardHeader>

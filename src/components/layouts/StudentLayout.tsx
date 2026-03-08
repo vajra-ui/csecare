@@ -1,13 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Upload,
-  TrendingUp,
-  FileText,
-  CalendarCheck,
-  LogOut,
-  User,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,6 +10,7 @@ import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
+import { useTheme } from 'next-themes';
 
 interface StudentLayoutProps {
   children: ReactNode;
@@ -24,8 +19,9 @@ interface StudentLayoutProps {
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/student' },
   { icon: User, label: 'Profile', path: '/student/profile' },
-  { icon: Upload, label: 'Upload', path: '/student/upload' },
-  { icon: TrendingUp, label: 'Progress Check', path: '/student/progress' },
+  { icon: Calendar, label: 'Timetable', path: '/student/timetable' },
+  { icon: Upload, label: 'Uploads', path: '/student/upload' },
+  { icon: TrendingUp, label: 'Progress', path: '/student/progress' },
   { icon: FileText, label: 'OD Submission', path: '/student/od' },
   { icon: CalendarCheck, label: 'Attendance', path: '/student/attendance' },
 ];
@@ -35,13 +31,11 @@ export function StudentLayout({ children }: StudentLayoutProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await logout();
-    toast({
-      title: 'Logged out',
-      description: 'You have been successfully logged out.',
-    });
+    toast({ title: 'Logged out', description: 'You have been successfully logged out.' });
     navigate('/');
   };
 
@@ -67,9 +61,7 @@ export function StudentLayout({ children }: StudentLayoutProps) {
                 variant="ghost"
                 className={cn(
                   'w-full justify-start gap-3 font-normal',
-                  isActive
-                    ? 'bg-info/10 text-info'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  isActive ? 'bg-info/10 text-info' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 )}
                 onClick={() => navigate(item.path)}
               >
@@ -84,23 +76,32 @@ export function StudentLayout({ children }: StudentLayoutProps) {
       <div className="p-4 border-t">
         <div className="flex items-center gap-3 mb-3">
           <div className="h-9 w-9 rounded-full bg-info/20 flex items-center justify-center">
-            <span className="text-sm font-medium text-info">
-              {user?.name?.charAt(0) || 'S'}
-            </span>
+            <span className="text-sm font-medium text-info">{user?.name?.charAt(0) || 'S'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user?.name}</p>
             <p className="text-xs text-muted-foreground truncate">Student</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex-1 justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
       </div>
     </aside>
   );
@@ -108,9 +109,7 @@ export function StudentLayout({ children }: StudentLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">
       <MobileSidebar>{sidebarContent}</MobileSidebar>
-      <div className="hidden md:block w-64 flex-shrink-0">
-        {sidebarContent}
-      </div>
+      <div className="hidden md:block w-64 flex-shrink-0">{sidebarContent}</div>
       <main className="flex-1 overflow-auto">
         <div className="p-4 md:p-6">{children}</div>
       </main>
