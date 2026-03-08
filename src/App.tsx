@@ -25,6 +25,7 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 
 // Faculty Pages
 import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
+import FacultyProfile from "@/pages/faculty/FacultyProfile";
 import FacultyAttendance from "@/pages/faculty/FacultyAttendance";
 import FacultyODRequests from "@/pages/faculty/FacultyODRequests";
 import FacultyTimetable from "@/pages/faculty/FacultyTimetable";
@@ -32,6 +33,7 @@ import FacultyStudents from "@/pages/faculty/FacultyStudents";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
+import StudentProfile from "@/pages/student/StudentProfile";
 import StudentOD from "@/pages/student/StudentOD";
 import StudentAttendance from "@/pages/student/StudentAttendance";
 import StudentProgress from "@/pages/student/StudentProgress";
