@@ -1,1 +1,4 @@
 project_id = "astvgqenzggnqgrkggzm"
+
+[functions.ai-student-advisor]
+verify_jwt = false

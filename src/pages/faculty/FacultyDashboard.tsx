@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, Users, Cake, ClipboardCheck } from 'lucide-react';
+import { Calendar, Clock, Users, Cake, ClipboardCheck, Zap, Activity, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FacultyLayout } from '@/components/layouts/FacultyLayout';
@@ -51,7 +51,6 @@ export default function FacultyDashboard() {
 
       const dayOfWeek = new Date().getDay();
 
-      // Parallel fetches - batch 1
       const [timetableRes, studentsRes, odRes] = await Promise.all([
         supabase.from('timetable').select('id, subject, section, hour_number').eq('faculty_id', faculty.id).eq('day_of_week', dayOfWeek),
         faculty.section
@@ -68,11 +67,9 @@ export default function FacultyDashboard() {
       const students = studentsRes.data || [];
       setStudentCount(students.length);
 
-      // Student birthdays today
       const todayBirthdays = students.filter((s: any) => isBirthday(s.dob));
       setBirthdayStudents(todayBirthdays.map((s: any) => ({ id: s.id, name: s.name, roll_number: s.roll_number })));
 
-      // Parallel fetches - batch 2
       const now = new Date().toISOString();
       const monthStart = new Date();
       monthStart.setDate(1);
@@ -88,7 +85,6 @@ export default function FacultyDashboard() {
         supabase.from('attendance').select('is_present, student_id').eq('faculty_id', faculty.id).gte('date', monthStart.toISOString().split('T')[0]),
       ]);
 
-      // Upcoming assignments with submission counts
       if (assignmentsRes.data) {
         const withCounts = await Promise.all(
           assignmentsRes.data.map(async (a: any) => {
@@ -99,7 +95,6 @@ export default function FacultyDashboard() {
         setUpcomingAssignments(withCounts);
       }
 
-      // Recent submissions
       if (submissionsRes.data) {
         setRecentSubmissions(submissionsRes.data.map((s: any) => ({
           id: s.id,
@@ -110,12 +105,10 @@ export default function FacultyDashboard() {
         })));
       }
 
-      // Teaching stats
       const attData = monthAttRes.data || [];
       const uniqueStudents = new Set(attData.map((a: any) => a.student_id));
       const presentCount = attData.filter((a: any) => a.is_present).length;
       const avgAtt = attData.length > 0 ? Math.round((presentCount / attData.length) * 100) : 0;
-      // Classes this month = unique dates in attendance
       const monthClassCount = attData.length > 0 ? Math.ceil(attData.length / Math.max(uniqueStudents.size, 1)) : 0;
       setTeachingStats({
         classesThisMonth: monthClassCount,
@@ -123,7 +116,6 @@ export default function FacultyDashboard() {
         totalStudentsTaught: uniqueStudents.size,
       });
 
-      // At-risk students (tutor only)
       if (user?.isTutor && students.length > 0) {
         const studentIds = students.map((s: any) => s.id);
         const [attRes, cgpaRes] = await Promise.all([
@@ -174,96 +166,79 @@ export default function FacultyDashboard() {
 
   return (
     <FacultyLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold">Welcome, {user?.name}!</h1>
-            <p className="text-muted-foreground text-sm">
-              {user?.isTutor ? 'Tutor' : 'Faculty'} • {user?.facultyId}
-            </p>
+      <div className="space-y-8 animate-fade-in">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden rounded-2xl gradient-hero p-6 md:p-8">
+          <div className="grid-pattern absolute inset-0 opacity-20" />
+          <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="h-4 w-4 text-neon-cyan" />
+                <Badge variant="outline" className="border-neon-cyan/30 text-neon-cyan font-body text-xs tracking-wider uppercase">
+                  {user?.isTutor ? 'Tutor Dashboard' : 'Faculty Dashboard'}
+                </Badge>
+              </div>
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground tracking-wide">
+                Welcome, {user?.name}!
+              </h1>
+              <p className="text-primary-foreground/60 font-body text-sm mt-1">
+                {user?.facultyId} • CSE Department
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {facultyData?.dob && isBirthday(facultyData.dob) && (
+                <Badge className="gap-1 bg-warning/20 text-warning border-warning/30 font-body animate-pulse-subtle">
+                  <Cake className="h-4 w-4" /> Happy Birthday! 🎉
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {facultyData?.dob && isBirthday(facultyData.dob) && (
-              <Badge variant="secondary" className="gap-1 bg-warning/20 text-warning-foreground">
-                <Cake className="h-4 w-4" /> Happy Birthday! 🎉
-              </Badge>
-            )}
+          <div className="absolute -bottom-6 -right-6 opacity-5">
+            <BookOpen className="h-40 w-40 text-neon-cyan" />
           </div>
         </div>
 
         {/* Stats Row */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Today's Classes</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{todayClasses.length}</div>
-              {currentPeriod && <p className="text-xs text-muted-foreground">Current: Period {currentPeriod}</p>}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Students</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studentCount}</div>
-              <p className="text-xs text-muted-foreground">{user?.isTutor ? 'In your section' : 'You teach'}</p>
-            </CardContent>
-          </Card>
-
-          {user?.isTutor && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pending OD</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{pendingOD}</div>
-                <p className="text-xs text-muted-foreground">Awaiting review</p>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Ungraded</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{recentSubmissions.filter(s => !s.grade).length}</div>
-              <p className="text-xs text-muted-foreground">Need grading</p>
-            </CardContent>
-          </Card>
+          {[
+            { title: "Today's Classes", value: todayClasses.length, icon: Calendar, sub: currentPeriod ? `Period ${currentPeriod}` : 'No active period', color: 'text-neon-cyan', border: 'neon-border' },
+            { title: 'Students', value: studentCount, icon: Users, sub: user?.isTutor ? 'In your section' : 'You teach', color: 'text-neon-purple', border: 'neon-border-purple' },
+            ...(user?.isTutor ? [{ title: 'Pending OD', value: pendingOD, icon: ClipboardCheck, sub: 'Awaiting review', color: 'text-warning', border: '' }] : []),
+            { title: 'Ungraded', value: recentSubmissions.filter(s => !s.grade).length, icon: Clock, sub: 'Need grading', color: 'text-neon-pink', border: 'neon-border-pink' },
+          ].map((stat, i) => (
+            <div
+              key={stat.title}
+              className={`futuristic-card stat-glow p-5 animate-slide-up ${stat.border}`}
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">{stat.title}</span>
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              </div>
+              <div className={`font-display text-3xl font-bold tracking-wide ${stat.color}`}>{stat.value}</div>
+              <p className="text-xs text-muted-foreground font-body mt-1">{stat.sub}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Content */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Attendance + Teaching Stats */}
             <div className="grid gap-4 sm:grid-cols-2">
               <QuickAttendanceCard currentClass={currentClass} nextClass={nextClass} />
               <TeachingStatsCard {...teachingStats} />
             </div>
 
-            {/* Today's Timetable */}
             <TodayTimetableCard classes={todayClasses} currentPeriod={currentPeriod} />
 
-            {/* Assignments + Submissions */}
             <div className="grid gap-4 sm:grid-cols-2">
               <UpcomingAssignmentsCard assignments={upcomingAssignments} />
               <RecentSubmissionsCard submissions={recentSubmissions} />
             </div>
 
-            {/* At-Risk Students (Tutor only) */}
             {user?.isTutor && <AtRiskStudentsCard students={atRiskStudents} />}
           </div>
 
-          {/* Right Sidebar */}
           <div className="space-y-6">
             <StudentBirthdaysCard students={birthdayStudents} />
             <AnnouncementPanel />
