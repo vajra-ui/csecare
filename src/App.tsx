@@ -40,6 +40,7 @@ import FacultyStudents from "@/pages/faculty/FacultyStudents";
 import StudentDashboard from "@/pages/student/StudentDashboard";
 import StudentProfile from "@/pages/student/StudentProfile";
 import StudentTimetable from "@/pages/student/StudentTimetable";
+import StudentAssignments from "@/pages/student/StudentAssignments";
 import StudentOD from "@/pages/student/StudentOD";
 import StudentAttendance from "@/pages/student/StudentAttendance";
 import StudentProgress from "@/pages/student/StudentProgress";
