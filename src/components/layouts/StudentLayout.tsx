@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
 import { useTheme } from 'next-themes';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface StudentLayoutProps {
   children: ReactNode;
