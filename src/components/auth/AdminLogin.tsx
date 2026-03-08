@@ -81,9 +81,9 @@ export function AdminLogin() {
               <PaavaiLogo size="lg" />
             </div>
             <div>
-              <CardTitle className="font-display text-2xl">Admin Login</CardTitle>
+              <CardTitle className="font-display text-2xl">{adminRole} Login</CardTitle>
               <CardDescription>
-                Access the administrative portal
+                Access the {adminRole.toLowerCase()} portal
               </CardDescription>
             </div>
           </CardHeader>
