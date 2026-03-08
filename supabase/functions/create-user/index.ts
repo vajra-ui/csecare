@@ -86,7 +86,8 @@ Deno.serve(async (req) => {
       // Password is DOB without dashes
       const password = data.dob.replace(/-/g, "");
 
-      // Create auth user
+      // Create or find existing auth user
+      let userId: string;
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -94,11 +95,27 @@ Deno.serve(async (req) => {
       });
 
       if (authError) {
-        console.error("Auth error:", authError);
-        return new Response(
-          JSON.stringify({ error: authError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        if (authError.message.includes("already been registered")) {
+          // Find existing user and update password
+          const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+          const existing = existingUsers?.users?.find(u => u.email === email);
+          if (!existing) {
+            return new Response(
+              JSON.stringify({ error: "User exists but could not be found" }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          await supabaseAdmin.auth.admin.updateUserById(existing.id, { password });
+          userId = existing.id;
+        } else {
+          console.error("Auth error:", authError);
+          return new Response(
+            JSON.stringify({ error: authError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        userId = authData.user!.id;
       }
 
       // Create student record
