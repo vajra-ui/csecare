@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen,
+  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,9 +31,14 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
     { icon: BookOpen, label: 'Assignments', path: '/faculty/assignments' },
+    { icon: PenLine, label: 'Internal Marks', path: '/faculty/marks' },
+    { icon: FileUp, label: 'Class Notes', path: '/faculty/notes' },
+    { icon: CalendarOff, label: 'Leave', path: '/faculty/leave' },
     ...(isTutor ? [
       { icon: Users, label: 'My Students', path: '/faculty/students' },
       { icon: FileText, label: 'OD Requests', path: '/faculty/od-requests' },
+      { icon: Phone, label: 'Parent Comms', path: '/faculty/parent-communication' },
+      { icon: MessageSquare, label: 'Mentoring', path: '/faculty/mentoring' },
     ] : []),
   ];
 
