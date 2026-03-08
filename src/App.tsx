@@ -118,6 +118,10 @@ function AppRoutes() {
       <Route path="/student/od" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentOD /></ProtectedRoute>} />
       <Route path="/student/attendance" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentAttendance /></ProtectedRoute>} />
       <Route path="/student/progress" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentProgress /></ProtectedRoute>} />
+      <Route path="/student/achievements" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentAchievements /></ProtectedRoute>} />
+      <Route path="/student/gpa-calculator" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentGPACalc /></ProtectedRoute>} />
+      <Route path="/student/exam-timetable" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentExamTimetable /></ProtectedRoute>} />
+      <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
