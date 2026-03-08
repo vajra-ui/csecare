@@ -31,6 +31,7 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
 import FacultyProfile from "@/pages/faculty/FacultyProfile";
 import FacultyAttendance from "@/pages/faculty/FacultyAttendance";
+import FacultyAssignments from "@/pages/faculty/FacultyAssignments";
 import FacultyODRequests from "@/pages/faculty/FacultyODRequests";
 import FacultyTimetable from "@/pages/faculty/FacultyTimetable";
 import FacultyStudents from "@/pages/faculty/FacultyStudents";
