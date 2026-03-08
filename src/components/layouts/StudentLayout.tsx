@@ -91,6 +91,7 @@ export function StudentLayout({ children }: StudentLayoutProps) {
           </div>
         </div>
         <div className="flex gap-2">
+          <NotificationBell />
           <Button
             variant="ghost"
             size="icon"
