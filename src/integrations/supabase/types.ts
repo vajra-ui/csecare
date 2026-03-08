@@ -271,6 +271,100 @@ export type Database = {
         }
         Relationships: []
       }
+      class_notes: {
+        Row: {
+          created_at: string
+          description: string | null
+          faculty_id: string
+          file_name: string
+          file_url: string
+          id: string
+          section: Database["public"]["Enums"]["section_type"]
+          subject: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          faculty_id: string
+          file_name: string
+          file_url: string
+          id?: string
+          section: Database["public"]["Enums"]["section_type"]
+          subject: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          faculty_id?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          section?: Database["public"]["Enums"]["section_type"]
+          subject?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_notes_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_timetable: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_time: string
+          exam_date: string
+          exam_name: string
+          id: string
+          section: Database["public"]["Enums"]["section_type"]
+          start_time: string
+          subject: string
+          venue: string | null
+          year: Database["public"]["Enums"]["year_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          exam_date: string
+          exam_name: string
+          id?: string
+          section: Database["public"]["Enums"]["section_type"]
+          start_time: string
+          subject: string
+          venue?: string | null
+          year: Database["public"]["Enums"]["year_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          exam_date?: string
+          exam_name?: string
+          id?: string
+          section?: Database["public"]["Enums"]["section_type"]
+          start_time?: string
+          subject?: string
+          venue?: string | null
+          year?: Database["public"]["Enums"]["year_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_timetable_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faculty: {
         Row: {
           created_at: string
@@ -315,6 +409,164 @@ export type Database = {
           years_of_experience?: number | null
         }
         Relationships: []
+      }
+      faculty_feedback: {
+        Row: {
+          comments: string | null
+          communication: number | null
+          created_at: string
+          faculty_id: string
+          id: string
+          punctuality: number | null
+          rating: number
+          section: Database["public"]["Enums"]["section_type"]
+          semester: number
+          subject: string
+          teaching_quality: number | null
+        }
+        Insert: {
+          comments?: string | null
+          communication?: number | null
+          created_at?: string
+          faculty_id: string
+          id?: string
+          punctuality?: number | null
+          rating: number
+          section: Database["public"]["Enums"]["section_type"]
+          semester: number
+          subject: string
+          teaching_quality?: number | null
+        }
+        Update: {
+          comments?: string | null
+          communication?: number | null
+          created_at?: string
+          faculty_id?: string
+          id?: string
+          punctuality?: number | null
+          rating?: number
+          section?: Database["public"]["Enums"]["section_type"]
+          semester?: number
+          subject?: string
+          teaching_quality?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_feedback_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faculty_leaves: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          end_date: string
+          faculty_id: string
+          id: string
+          leave_type: string
+          reason: string
+          remarks: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          end_date: string
+          faculty_id: string
+          id?: string
+          leave_type?: string
+          reason: string
+          remarks?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          end_date?: string
+          faculty_id?: string
+          id?: string
+          leave_type?: string
+          reason?: string
+          remarks?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_leaves_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faculty_leaves_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentoring_sessions: {
+        Row: {
+          action_items: string | null
+          created_at: string
+          id: string
+          next_session_date: string | null
+          notes: string
+          session_date: string
+          session_type: string
+          student_id: string
+          tutor_id: string
+        }
+        Insert: {
+          action_items?: string | null
+          created_at?: string
+          id?: string
+          next_session_date?: string | null
+          notes: string
+          session_date: string
+          session_type?: string
+          student_id: string
+          tutor_id: string
+        }
+        Update: {
+          action_items?: string | null
+          created_at?: string
+          id?: string
+          next_session_date?: string | null
+          notes?: string
+          session_date?: string
+          session_type?: string
+          student_id?: string
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentoring_sessions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentoring_sessions_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       od_requests: {
         Row: {
@@ -385,6 +637,63 @@ export type Database = {
           },
         ]
       }
+      parent_communications: {
+        Row: {
+          communication_type: string
+          created_at: string
+          date: string
+          follow_up_date: string | null
+          follow_up_needed: boolean | null
+          id: string
+          parent_name: string | null
+          parent_phone: string | null
+          student_id: string
+          summary: string
+          tutor_id: string
+        }
+        Insert: {
+          communication_type?: string
+          created_at?: string
+          date: string
+          follow_up_date?: string | null
+          follow_up_needed?: boolean | null
+          id?: string
+          parent_name?: string | null
+          parent_phone?: string | null
+          student_id: string
+          summary: string
+          tutor_id: string
+        }
+        Update: {
+          communication_type?: string
+          created_at?: string
+          date?: string
+          follow_up_date?: string | null
+          follow_up_needed?: boolean | null
+          id?: string
+          parent_name?: string | null
+          parent_phone?: string | null
+          student_id?: string
+          summary?: string
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_communications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_communications_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -411,6 +720,60 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      student_achievements: {
+        Row: {
+          category: string
+          certificate_url: string | null
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          student_id: string
+          title: string
+          verified: boolean | null
+          verified_by: string | null
+        }
+        Insert: {
+          category?: string
+          certificate_url?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          student_id: string
+          title: string
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Update: {
+          category?: string
+          certificate_url?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          student_id?: string
+          title?: string
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_achievements_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_achievements_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_documents: {
         Row: {
