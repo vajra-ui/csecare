@@ -125,6 +125,7 @@ function AppRoutes() {
       <Route path="/student/gpa-calculator" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentGPACalc /></ProtectedRoute>} />
       <Route path="/student/exam-timetable" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentExamTimetable /></ProtectedRoute>} />
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
+      <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
