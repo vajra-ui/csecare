@@ -122,6 +122,7 @@ export function StudentLayout({ children }: StudentLayoutProps) {
       <main className="flex-1 overflow-auto">
         <div className="p-4 md:p-6">{children}</div>
       </main>
+      <StudentAIAssistant />
     </div>
   );
 }
