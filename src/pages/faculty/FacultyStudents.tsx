@@ -56,15 +56,21 @@ export default function FacultyStudents() {
 
       const { data: faculty } = await supabase
         .from('faculty')
-        .select('id, section')
+        .select('id, section, is_tutor')
         .eq('user_id', user.id)
         .single();
 
       if (faculty) {
         let query = supabase.from('students').select('*').order('roll_number');
-        if (faculty.section) {
+
+        if (faculty.is_tutor && faculty.section) {
+          // Tutors can ONLY see students in their assigned section
+          query = query.eq('section', faculty.section as any);
+        } else if (faculty.section) {
+          // Non-tutor faculty with section assigned — filter by section
           query = query.eq('section', faculty.section as any);
         } else {
+          // Faculty with no section — show only students where they're assigned as tutor
           query = query.eq('tutor_id', faculty.id);
         }
 

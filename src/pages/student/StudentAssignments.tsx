@@ -104,6 +104,29 @@ export default function StudentAssignments() {
       } as any);
       if (insErr) throw insErr;
 
+      // Notify the faculty who created this assignment
+      const { data: facultyData } = await supabase
+        .from('faculty')
+        .select('user_id, name')
+        .eq('id', selectedAssignment.faculty_id)
+        .single();
+
+      if (facultyData?.user_id) {
+        const { data: studentInfo } = await supabase
+          .from('students')
+          .select('name, roll_number')
+          .eq('id', studentId)
+          .single();
+
+        await supabase.from('notifications').insert({
+          user_id: facultyData.user_id,
+          title: 'New Assignment Submission',
+          message: `${studentInfo?.name || 'A student'} (${studentInfo?.roll_number || ''}) submitted "${selectedAssignment.title}" — ${selectedAssignment.subject}`,
+          type: 'assignment',
+          link: '/faculty/assignments',
+        });
+      }
+
       toast({ title: 'Submitted!', description: `Assignment "${selectedAssignment.title}" submitted.` });
       setSelectedAssignment(null);
       fetchData();

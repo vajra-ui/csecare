@@ -122,6 +122,33 @@ export default function StudentUpload() {
 
       if (insertError) throw insertError;
 
+      // If uploading assignment, notify the tutor/faculty of the student's section
+      if (activeTab === 'assignment') {
+        const { data: student } = await supabase
+          .from('students')
+          .select('name, roll_number, section, tutor_id')
+          .eq('id', studentData.id)
+          .single();
+
+        if (student?.tutor_id) {
+          const { data: tutor } = await supabase
+            .from('faculty')
+            .select('user_id')
+            .eq('id', student.tutor_id)
+            .single();
+
+          if (tutor?.user_id) {
+            await supabase.from('notifications').insert({
+              user_id: tutor.user_id,
+              title: 'New Document Upload',
+              message: `${student.name} (${student.roll_number}) uploaded an assignment document: ${file.name}${uploadSubject ? ` — ${uploadSubject}` : ''}`,
+              type: 'document',
+              link: '/faculty/students',
+            });
+          }
+        }
+      }
+
       toast({ title: 'Uploaded', description: `${file.name} uploaded successfully.` });
       setUploadDesc('');
       setUploadSubject('');
