@@ -171,6 +171,8 @@ export default function FacultyProfile() {
             </Button>
           </CardContent>
         </Card>
+
+        <ChangePasswordCard />
       </div>
     </FacultyLayout>
   );

@@ -224,6 +224,8 @@ export default function StudentProfile() {
             </div>
           </CardContent>
         </Card>
+
+        <ChangePasswordCard />
       </div>
     </StudentLayout>
   );
