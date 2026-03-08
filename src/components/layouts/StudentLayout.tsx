@@ -23,6 +23,7 @@ interface StudentLayoutProps {
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/student' },
+  { icon: User, label: 'Profile', path: '/student/profile' },
   { icon: Upload, label: 'Upload', path: '/student/upload' },
   { icon: TrendingUp, label: 'Progress Check', path: '/student/progress' },
   { icon: FileText, label: 'OD Submission', path: '/student/od' },
