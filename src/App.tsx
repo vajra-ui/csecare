@@ -35,6 +35,11 @@ import FacultyAssignments from "@/pages/faculty/FacultyAssignments";
 import FacultyODRequests from "@/pages/faculty/FacultyODRequests";
 import FacultyTimetable from "@/pages/faculty/FacultyTimetable";
 import FacultyStudents from "@/pages/faculty/FacultyStudents";
+import FacultyMarks from "@/pages/faculty/FacultyMarks";
+import FacultyNotes from "@/pages/faculty/FacultyNotes";
+import FacultyLeave from "@/pages/faculty/FacultyLeave";
+import FacultyParentComm from "@/pages/faculty/FacultyParentComm";
+import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
