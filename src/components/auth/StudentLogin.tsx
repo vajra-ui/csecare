@@ -52,7 +52,7 @@ export function StudentLogin() {
         title: `Welcome, ${user.name}!`,
         description: 'You have successfully logged in.',
       });
-      navigate('/student');
+      setShowTransition(true);
     } catch (error) {
       toast({
         title: 'Login Failed',
