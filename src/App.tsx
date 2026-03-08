@@ -23,6 +23,7 @@ import AdminFaculty from "@/pages/admin/AdminFaculty";
 import AdminAnnouncements from "@/pages/admin/AdminAnnouncements";
 import AdminODRequests from "@/pages/admin/AdminODRequests";
 import AdminAuditLogs from "@/pages/admin/AdminAuditLogs";
+import AdminReports from "@/pages/admin/AdminReports";
 import AdminSettings from "@/pages/admin/AdminSettings";
 
 // Faculty Pages
@@ -78,6 +79,7 @@ function AppRoutes() {
       <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAnnouncements /></ProtectedRoute>} />
       <Route path="/admin/od-requests" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminODRequests /></ProtectedRoute>} />
       <Route path="/admin/audit-logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAuditLogs /></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminReports /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
