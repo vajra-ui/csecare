@@ -40,6 +40,7 @@ import FacultyNotes from "@/pages/faculty/FacultyNotes";
 import FacultyLeave from "@/pages/faculty/FacultyLeave";
 import FacultyParentComm from "@/pages/faculty/FacultyParentComm";
 import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
+import FacultyMessages from "@/pages/faculty/FacultyMessages";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
