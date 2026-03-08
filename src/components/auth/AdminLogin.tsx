@@ -53,7 +53,7 @@ export function AdminLogin() {
         title: 'Welcome, Administrator!',
         description: 'You have successfully logged in.',
       });
-      navigate('/admin');
+      setShowTransition(true);
     } catch (error) {
       toast({
         title: 'Login Failed',
