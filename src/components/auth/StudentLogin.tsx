@@ -156,5 +156,6 @@ export function StudentLogin() {
         </Card>
       </div>
     </div>
+    </>
   );
 }

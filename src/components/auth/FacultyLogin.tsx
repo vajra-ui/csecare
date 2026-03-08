@@ -156,5 +156,6 @@ export function FacultyLogin() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
