@@ -37,8 +37,8 @@ export function AdminLogin() {
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: adminRole === 'HOD' ? 'vajraofficial7@gmail.com' : '',
+      password: adminRole === 'HOD' ? 'admin@2026' : '',
     },
   });
 
