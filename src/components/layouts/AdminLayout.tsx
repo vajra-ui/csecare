@@ -26,6 +26,7 @@ const navItems = [
   { icon: Megaphone, label: 'Announcements', path: '/admin/announcements' },
   { icon: ClipboardList, label: 'OD Requests', path: '/admin/od-requests' },
   { icon: FileSpreadsheet, label: 'Audit Logs', path: '/admin/audit-logs' },
+  { icon: FileText, label: 'Reports', path: '/admin/reports' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
