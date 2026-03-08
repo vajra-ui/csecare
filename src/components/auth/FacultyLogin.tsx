@@ -64,7 +64,11 @@ export function FacultyLogin() {
     }
   };
 
+  const handleTransitionComplete = useCallback(() => navigate('/faculty'), [navigate]);
+
   return (
+    <>
+    {showTransition && <LoginTransition roleName="Faculty" onComplete={handleTransitionComplete} />}
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         <Card className="border-2">
