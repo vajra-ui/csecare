@@ -103,6 +103,11 @@ function AppRoutes() {
       <Route path="/faculty/assignments" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyAssignments /></ProtectedRoute>} />
       <Route path="/faculty/students" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyStudents /></ProtectedRoute>} />
       <Route path="/faculty/od-requests" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyODRequests /></ProtectedRoute>} />
+      <Route path="/faculty/marks" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyMarks /></ProtectedRoute>} />
+      <Route path="/faculty/notes" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyNotes /></ProtectedRoute>} />
+      <Route path="/faculty/leave" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyLeave /></ProtectedRoute>} />
+      <Route path="/faculty/parent-communication" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyParentComm /></ProtectedRoute>} />
+      <Route path="/faculty/mentoring" element={<ProtectedRoute allowedRoles={['TUTOR']}><FacultyMentoring /></ProtectedRoute>} />
       
       {/* Student Routes */}
       <Route path="/student" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDashboard /></ProtectedRoute>} />
