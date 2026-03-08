@@ -30,6 +30,7 @@ const navItems = [
   { icon: Calculator, label: 'GPA Calculator', path: '/student/gpa-calculator' },
   { icon: ClipboardList, label: 'Exam Timetable', path: '/student/exam-timetable' },
   { icon: Star, label: 'Feedback', path: '/student/feedback' },
+  { icon: Mail, label: 'Messages', path: '/student/messages' },
 ];
 
 export function StudentLayout({ children }: StudentLayoutProps) {
