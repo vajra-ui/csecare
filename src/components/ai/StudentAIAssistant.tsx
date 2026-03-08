@@ -3,8 +3,24 @@ import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import ReactMarkdown from 'react-markdown';
 
 type Message = { role: 'user' | 'assistant'; content: string };
+
+interface StudentContext {
+  name: string;
+  rollNumber: string;
+  section: string;
+  year: string;
+  attendancePercentage: number | null;
+  cgpa: number | null;
+  semesterCGPAs: { semester: number; cgpa: number }[];
+  subjectScores: any[];
+  pendingAssignments: number;
+  submittedAssignments: number;
+  achievements: any[];
+  odRequests: any[];
+}
 
 export function StudentAIAssistant() {
   const { user } = useAuth();
@@ -12,6 +28,8 @@ export function StudentAIAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [studentContext, setStudentContext] = useState<StudentContext | null>(null);
+  const [contextLoaded, setContextLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -19,6 +37,66 @@ export function StudentAIAssistant() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Fetch student data when chat opens
+  useEffect(() => {
+    if (open && !contextLoaded) {
+      fetchStudentContext();
+    }
+  }, [open]);
+
+  const fetchStudentContext = async () => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
+
+      // Fetch student record
+      const { data: student } = await supabase
+        .from('students')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single();
+
+      if (!student) return;
+
+      // Fetch all data in parallel
+      const [attRes, academicRes, scoresRes, assignmentsRes, submissionsRes, achievementsRes, odRes] = await Promise.all([
+        supabase.rpc('get_attendance_percentage', { _student_id: student.id }),
+        supabase.from('academic_records').select('semester, cgpa').eq('student_id', student.id).order('semester', { ascending: true }),
+        supabase.from('subject_scores').select('subject_name, semester, internal_marks, external_marks, total_marks, grade').eq('student_id', student.id).order('semester', { ascending: false }).limit(20),
+        supabase.from('assignments').select('id, title, due_date, section').eq('section', student.section),
+        supabase.from('assignment_submissions').select('assignment_id').eq('student_id', student.id),
+        supabase.from('student_achievements').select('title, category, date').eq('student_id', student.id).order('date', { ascending: false }).limit(5),
+        supabase.from('od_requests').select('reason, status, start_date, end_date').eq('student_id', student.id).order('created_at', { ascending: false }).limit(5),
+      ]);
+
+      const academicRecords = academicRes.data || [];
+      const latestCGPA = academicRecords.length > 0 ? academicRecords[academicRecords.length - 1].cgpa : null;
+      
+      const allAssignments = assignmentsRes.data || [];
+      const submittedIds = new Set((submissionsRes.data || []).map((s: any) => s.assignment_id));
+      const pendingAssignments = allAssignments.filter((a: any) => !submittedIds.has(a.id)).length;
+
+      setStudentContext({
+        name: student.name,
+        rollNumber: student.roll_number,
+        section: student.section,
+        year: student.year,
+        attendancePercentage: attRes.data !== null ? Number(attRes.data) : null,
+        cgpa: latestCGPA ? Number(latestCGPA) : null,
+        semesterCGPAs: academicRecords.map((r: any) => ({ semester: r.semester, cgpa: Number(r.cgpa) })),
+        subjectScores: scoresRes.data || [],
+        pendingAssignments,
+        submittedAssignments: submittedIds.size,
+        achievements: achievementsRes.data || [],
+        odRequests: odRes.data || [],
+      });
+      setContextLoaded(true);
+    } catch (error) {
+      console.error('Error fetching student context:', error);
+      setContextLoaded(true);
+    }
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -30,7 +108,11 @@ export function StudentAIAssistant() {
 
     try {
       const resp = await supabase.functions.invoke('ai-student-advisor', {
-        body: { messages: newMessages, studentName: user?.name || 'Student' },
+        body: {
+          messages: newMessages,
+          studentName: user?.name || 'Student',
+          studentContext: studentContext,
+        },
       });
 
       if (resp.error) throw resp.error;
@@ -49,6 +131,16 @@ export function StudentAIAssistant() {
       setLoading(false);
     }
   };
+
+  const quickQuestions = studentContext ? [
+    `How is my attendance at ${studentContext.attendancePercentage ?? 'N/A'}%? What should I do?`,
+    studentContext.cgpa ? `My CGPA is ${studentContext.cgpa}. How can I improve?` : 'How can I improve my CGPA?',
+    studentContext.pendingAssignments > 0 ? `I have ${studentContext.pendingAssignments} pending assignments. Help me plan.` : 'Tips for time management',
+  ] : [
+    'How can I improve my CGPA?',
+    'Tips for time management',
+    'Career paths in CSE',
+  ];
 
   return (
     <>
@@ -75,7 +167,9 @@ export function StudentAIAssistant() {
               </div>
               <div>
                 <p className="font-display text-xs font-semibold tracking-wider">AI ADVISOR</p>
-                <p className="text-[10px] text-muted-foreground font-body">Academic guidance & support</p>
+                <p className="text-[10px] text-muted-foreground font-body">
+                  {contextLoaded ? 'Connected to your data' : 'Loading your data...'}
+                </p>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
@@ -89,11 +183,19 @@ export function StudentAIAssistant() {
               <div className="text-center py-8 px-4">
                 <Bot className="h-10 w-10 mx-auto text-neon-cyan/40 mb-3" />
                 <p className="font-display text-sm font-semibold tracking-wide mb-1">Hi, {user?.name?.split(' ')[0] || 'there'}!</p>
-                <p className="text-xs text-muted-foreground font-body mb-4">
-                  I'm your AI academic advisor. Ask me about study tips, time management, career guidance, or anything related to your academics.
+                <p className="text-xs text-muted-foreground font-body mb-2">
+                  I have access to your academic data — attendance, CGPA, scores, assignments, and more. Ask me anything!
                 </p>
+                {studentContext && (
+                  <div className="text-xs text-left bg-muted/30 rounded-lg p-2 mb-3 space-y-1 border border-border/50">
+                    <p className="text-muted-foreground">📊 <strong>Attendance:</strong> {studentContext.attendancePercentage ?? 'N/A'}%</p>
+                    <p className="text-muted-foreground">📈 <strong>CGPA:</strong> {studentContext.cgpa ?? 'N/A'}</p>
+                    <p className="text-muted-foreground">📝 <strong>Pending:</strong> {studentContext.pendingAssignments} assignments</p>
+                    <p className="text-muted-foreground">🏆 <strong>Achievements:</strong> {studentContext.achievements.length}</p>
+                  </div>
+                )}
                 <div className="space-y-2">
-                  {['How can I improve my CGPA?', 'Tips for time management', 'Career paths in CSE'].map((q) => (
+                  {quickQuestions.map((q) => (
                     <button
                       key={q}
                       onClick={() => { setInput(q); }}
@@ -115,7 +217,13 @@ export function StudentAIAssistant() {
                       : 'bg-muted/50 border border-border/50'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_li]:my-0.5 [&_h1]:text-sm [&_h2]:text-sm [&_h3]:text-xs">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -139,7 +247,7 @@ export function StudentAIAssistant() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder="Ask about your grades, attendance..."
                 className="flex-1 bg-muted/30 border border-border/50 rounded-lg px-3 py-2 text-sm font-body placeholder:text-muted-foreground/50 focus:outline-none focus:border-neon-cyan/40 transition-colors"
               />
               <Button
