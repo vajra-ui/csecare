@@ -51,19 +51,27 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
   };
 
   const sidebarContent = (
-    <aside className="h-full bg-card border-r flex flex-col">
-      <div className="p-4 border-b">
+    <aside className="h-full flex flex-col relative overflow-hidden" style={{ background: 'linear-gradient(180deg, hsl(35 30% 8%) 0%, hsl(30 25% 12%) 100%)' }}>
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-secondary/10 to-transparent pointer-events-none" />
+
+      <div className="p-4 border-b border-secondary/10 relative z-10">
         <div className="flex items-center gap-3">
-          <PaavaiLogo size="sm" />
+          <div className="relative">
+            <div className="absolute inset-0 bg-secondary/20 rounded-lg blur-sm" />
+            <div className="relative bg-card/90 p-1.5 rounded-lg border border-secondary/20">
+              <PaavaiLogo size="sm" />
+            </div>
+          </div>
           <div>
-            <h2 className="font-display font-semibold text-sm">Faculty Portal</h2>
-            <p className="text-xs text-muted-foreground">CSE Department</p>
+            <h2 className="font-display font-semibold text-xs tracking-wider text-primary-foreground">Faculty Portal</h2>
+            <p className="text-[10px] text-muted-foreground font-body tracking-wider">CSE Department</p>
           </div>
         </div>
       </div>
 
-      <ScrollArea className="flex-1 py-4">
-        <nav className="px-3 space-y-1">
+      <ScrollArea className="flex-1 py-3 relative z-10">
+        <nav className="px-3 space-y-0.5">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -71,12 +79,14 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
                 key={item.path}
                 variant="ghost"
                 className={cn(
-                  'w-full justify-start gap-3 font-normal',
-                  isActive ? 'bg-secondary/50 text-secondary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  'w-full justify-start gap-3 font-body text-sm h-9 rounded-lg transition-all duration-200',
+                  isActive
+                    ? 'bg-secondary/15 text-secondary border border-secondary/20 shadow-[0_0_10px_hsl(var(--secondary)/0.1)]'
+                    : 'text-muted-foreground hover:text-primary-foreground hover:bg-primary-foreground/5 border border-transparent'
                 )}
                 onClick={() => navigate(item.path)}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className={cn('h-4 w-4', isActive && 'text-secondary')} />
                 {item.label}
               </Button>
             );
@@ -84,27 +94,27 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
         </nav>
       </ScrollArea>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-secondary/10 relative z-10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
-            <span className="text-sm font-medium text-secondary-foreground">{user?.name?.charAt(0) || 'F'}</span>
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-secondary to-warning flex items-center justify-center shadow-gold">
+            <span className="text-sm font-bold text-secondary-foreground font-display">{user?.name?.charAt(0) || 'F'}</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              {isTutor && <Badge variant="secondary" className="text-xs">Tutor</Badge>}
+              <p className="text-sm font-body font-medium truncate text-primary-foreground">{user?.name}</p>
+              {isTutor && <Badge className="text-[10px] px-1.5 py-0 bg-secondary/20 text-secondary border-secondary/30 font-body">Tutor</Badge>}
             </div>
-            <p className="text-xs text-muted-foreground truncate">{user?.facultyId}</p>
+            <p className="text-[10px] text-muted-foreground font-body truncate">{user?.facultyId}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <NotificationBell />
-          <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary-foreground hover:bg-primary-foreground/5" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            <Sun className="h-3.5 w-3.5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-3.5 w-3.5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          <Button variant="ghost" className="flex-1 justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-            <LogOut className="h-4 w-4" /> Sign Out
+          <Button variant="ghost" className="flex-1 justify-start gap-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 font-body" onClick={handleLogout}>
+            <LogOut className="h-3.5 w-3.5" /> Sign Out
           </Button>
         </div>
       </div>
@@ -116,7 +126,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
       <MobileSidebar>{sidebarContent}</MobileSidebar>
       <div className="hidden md:block w-64 flex-shrink-0">{sidebarContent}</div>
       <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">{children}</div>
+        <div className="p-4 md:p-6 grid-pattern">{children}</div>
       </main>
     </div>
   );
