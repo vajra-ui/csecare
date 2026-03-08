@@ -33,6 +33,7 @@ export function StudentLogin() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
 
   const form = useForm<StudentLoginForm>({
     resolver: zodResolver(studentLoginSchema),
