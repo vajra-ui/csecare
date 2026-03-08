@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MobileSidebar } from './MobileSidebar';
 import { useTheme } from 'next-themes';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { StudentAIAssistant } from '@/components/ai/StudentAIAssistant';
 
 interface StudentLayoutProps {
   children: ReactNode;
