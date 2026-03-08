@@ -86,7 +86,8 @@ Deno.serve(async (req) => {
       // Password is DOB without dashes
       const password = data.dob.replace(/-/g, "");
 
-      // Create auth user
+      // Create or find existing auth user
+      let userId: string;
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -94,50 +95,104 @@ Deno.serve(async (req) => {
       });
 
       if (authError) {
-        console.error("Auth error:", authError);
-        return new Response(
-          JSON.stringify({ error: authError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        if (authError.message.includes("already been registered")) {
+          // Find existing user and update password
+          const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+          const existing = existingUsers?.users?.find(u => u.email === email);
+          if (!existing) {
+            return new Response(
+              JSON.stringify({ error: "User exists but could not be found" }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          await supabaseAdmin.auth.admin.updateUserById(existing.id, { password });
+          userId = existing.id;
+        } else {
+          console.error("Auth error:", authError);
+          return new Response(
+            JSON.stringify({ error: authError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        userId = authData.user!.id;
       }
 
-      // Create student record
-      const { data: studentData, error: studentError } = await supabaseAdmin
+      // Check if student record already exists for this user
+      const { data: existingStudent } = await supabaseAdmin
         .from("students")
-        .insert({
-          user_id: authData.user!.id,
-          name: data.name,
-          roll_number: data.rollNumber.toUpperCase(),
-          register_number: data.registerNumber.toUpperCase(),
-          dob: data.dob,
-          section: data.section || "CSE A",
-          year: data.year || "I",
-        })
-        .select()
-        .single();
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (studentError) {
-        // Rollback: delete auth user
-        await supabaseAdmin.auth.admin.deleteUser(authData.user!.id);
-        console.error("Student error:", studentError);
-        return new Response(
-          JSON.stringify({ error: studentError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      let studentData;
+      if (existingStudent) {
+        // Update existing student
+        const { data: updated, error: updateErr } = await supabaseAdmin
+          .from("students")
+          .update({
+            name: data.name,
+            roll_number: data.rollNumber.toUpperCase(),
+            register_number: data.registerNumber.toUpperCase(),
+            dob: data.dob,
+            section: data.section || "CSE A",
+            year: data.year || "I",
+          })
+          .eq("id", existingStudent.id)
+          .select()
+          .single();
+        if (updateErr) {
+          return new Response(
+            JSON.stringify({ error: updateErr.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        studentData = updated;
+      } else {
+        // Create student record
+        const { data: created, error: studentError } = await supabaseAdmin
+          .from("students")
+          .insert({
+            user_id: userId,
+            name: data.name,
+            roll_number: data.rollNumber.toUpperCase(),
+            register_number: data.registerNumber.toUpperCase(),
+            dob: data.dob,
+            section: data.section || "CSE A",
+            year: data.year || "I",
+          })
+          .select()
+          .single();
+
+        if (studentError) {
+          console.error("Student error:", studentError);
+          return new Response(
+            JSON.stringify({ error: studentError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        studentData = created;
       }
 
-      // Create role
-      await supabaseAdmin.from("user_roles").insert({
-        user_id: authData.user!.id,
+      // Upsert role
+      await supabaseAdmin.from("user_roles").upsert({
+        user_id: userId,
         role: "STUDENT",
-      });
+      }, { onConflict: "user_id,role" });
 
-      // Create profile
-      await supabaseAdmin.from("profiles").insert({
-        user_id: authData.user!.id,
-        name: data.name,
-        email,
-      });
+      // Upsert profile
+      const { data: existingProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existingProfile) {
+        await supabaseAdmin.from("profiles").insert({
+          user_id: userId,
+          name: data.name,
+          email,
+        });
+      }
 
       // Audit log
       await supabaseAdmin.from("audit_logs").insert({
@@ -169,7 +224,8 @@ Deno.serve(async (req) => {
       const email = `${facultyId.toLowerCase()}@paavai.edu.in`;
       const password = data.dob.replace(/-/g, "");
 
-      // Create auth user
+      // Create or find existing auth user
+      let userId: string;
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -177,18 +233,33 @@ Deno.serve(async (req) => {
       });
 
       if (authError) {
-        console.error("Auth error:", authError);
-        return new Response(
-          JSON.stringify({ error: authError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        if (authError.message.includes("already been registered")) {
+          const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+          const existing = existingUsers?.users?.find(u => u.email === email);
+          if (!existing) {
+            return new Response(
+              JSON.stringify({ error: "User exists but could not be found" }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          await supabaseAdmin.auth.admin.updateUserById(existing.id, { password });
+          userId = existing.id;
+        } else {
+          console.error("Auth error:", authError);
+          return new Response(
+            JSON.stringify({ error: authError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        userId = authData.user!.id;
       }
 
       // Create faculty record
       const { data: facultyData, error: facultyError } = await supabaseAdmin
         .from("faculty")
         .insert({
-          user_id: authData.user!.id,
+          user_id: userId,
           faculty_id: facultyId,
           name: data.name,
           dob: data.dob,
@@ -202,7 +273,6 @@ Deno.serve(async (req) => {
         .single();
 
       if (facultyError) {
-        await supabaseAdmin.auth.admin.deleteUser(authData.user!.id);
         console.error("Faculty error:", facultyError);
         return new Response(
           JSON.stringify({ error: facultyError.message }),
@@ -210,18 +280,25 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Create role
-      await supabaseAdmin.from("user_roles").insert({
-        user_id: authData.user!.id,
+      // Upsert role
+      await supabaseAdmin.from("user_roles").upsert({
+        user_id: userId,
         role: data.isTutor ? "TUTOR" : "FACULTY",
-      });
+      }, { onConflict: "user_id,role" });
 
-      // Create profile
-      await supabaseAdmin.from("profiles").insert({
-        user_id: authData.user!.id,
-        name: data.name,
-        email,
-      });
+      // Upsert profile
+      const { data: existingProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existingProfile) {
+        await supabaseAdmin.from("profiles").insert({
+          user_id: userId,
+          name: data.name,
+          email,
+        });
+      }
 
       // Audit log
       await supabaseAdmin.from("audit_logs").insert({
