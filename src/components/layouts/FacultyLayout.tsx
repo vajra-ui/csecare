@@ -30,6 +30,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: User, label: 'Profile', path: '/faculty/profile' },
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
+    { icon: BookOpen, label: 'Assignments', path: '/faculty/assignments' },
     ...(isTutor ? [
       { icon: Users, label: 'My Students', path: '/faculty/students' },
       { icon: FileText, label: 'OD Requests', path: '/faculty/od-requests' },
