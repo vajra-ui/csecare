@@ -33,6 +33,7 @@ export function FacultyLogin() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
 
   const form = useForm<FacultyLoginForm>({
     resolver: zodResolver(facultyLoginSchema),
