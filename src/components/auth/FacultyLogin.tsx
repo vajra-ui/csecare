@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, IdCard, Calendar, Loader2 } from 'lucide-react';
+import { LoginTransition } from './LoginTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,6 +33,7 @@ export function FacultyLogin() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
 
   const form = useForm<FacultyLoginForm>({
     resolver: zodResolver(facultyLoginSchema),
@@ -50,7 +52,7 @@ export function FacultyLogin() {
         title: `Welcome, ${user.name}!`,
         description: user.isTutor ? 'Logged in as Tutor' : 'Logged in as Faculty',
       });
-      navigate('/faculty');
+      setShowTransition(true);
     } catch (error) {
       toast({
         title: 'Login Failed',
@@ -62,7 +64,11 @@ export function FacultyLogin() {
     }
   };
 
+  const handleTransitionComplete = useCallback(() => navigate('/faculty'), [navigate]);
+
   return (
+    <>
+    {showTransition && <LoginTransition roleName="Faculty" onComplete={handleTransitionComplete} />}
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         <Card className="border-2">
@@ -150,5 +156,6 @@ export function FacultyLogin() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
