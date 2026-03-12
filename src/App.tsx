@@ -41,6 +41,11 @@ import FacultyLeave from "@/pages/faculty/FacultyLeave";
 import FacultyParentComm from "@/pages/faculty/FacultyParentComm";
 import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
 import FacultyMessages from "@/pages/faculty/FacultyMessages";
+import FacultyAchievements from "@/pages/faculty/FacultyAchievements";
+import FacultyODSubmit from "@/pages/faculty/FacultyODSubmit";
+
+// Admin extra
+import AdminFacultyOD from "@/pages/admin/AdminFacultyOD";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
