@@ -410,6 +410,50 @@ export type Database = {
         }
         Relationships: []
       }
+      faculty_achievements: {
+        Row: {
+          category: string
+          certificate_url: string | null
+          created_at: string
+          date: string
+          description: string | null
+          faculty_id: string
+          id: string
+          title: string
+          verified: boolean | null
+        }
+        Insert: {
+          category?: string
+          certificate_url?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          faculty_id: string
+          id?: string
+          title: string
+          verified?: boolean | null
+        }
+        Update: {
+          category?: string
+          certificate_url?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          faculty_id?: string
+          id?: string
+          title?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_achievements_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faculty_feedback: {
         Row: {
           comments: string | null
@@ -510,6 +554,50 @@ export type Database = {
           },
           {
             foreignKeyName: "faculty_leaves_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faculty_od_requests: {
+        Row: {
+          admin_remarks: string | null
+          created_at: string
+          end_date: string
+          faculty_id: string
+          id: string
+          reason: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_remarks?: string | null
+          created_at?: string
+          end_date: string
+          faculty_id: string
+          id?: string
+          reason: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_remarks?: string | null
+          created_at?: string
+          end_date?: string
+          faculty_id?: string
+          id?: string
+          reason?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_od_requests_faculty_id_fkey"
             columns: ["faculty_id"]
             isOneToOne: false
             referencedRelation: "faculty"
@@ -881,6 +969,7 @@ export type Database = {
       }
       students: {
         Row: {
+          admission_year: number | null
           created_at: string
           dob: string
           id: string
@@ -889,12 +978,14 @@ export type Database = {
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
+          status: string
           tutor_id: string | null
           updated_at: string
           user_id: string | null
           year: Database["public"]["Enums"]["year_type"]
         }
         Insert: {
+          admission_year?: number | null
           created_at?: string
           dob: string
           id?: string
@@ -903,12 +994,14 @@ export type Database = {
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
+          status?: string
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
           year: Database["public"]["Enums"]["year_type"]
         }
         Update: {
+          admission_year?: number | null
           created_at?: string
           dob?: string
           id?: string
@@ -917,6 +1010,7 @@ export type Database = {
           register_number?: string
           roll_number?: string
           section?: Database["public"]["Enums"]["section_type"]
+          status?: string
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
