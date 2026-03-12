@@ -35,9 +35,11 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: PenLine, label: 'Internal Marks', path: '/faculty/marks' },
     { icon: FileUp, label: 'Class Notes', path: '/faculty/notes' },
     { icon: CalendarOff, label: 'Leave', path: '/faculty/leave' },
+    { icon: CalendarClock, label: 'My OD Requests', path: '/faculty/my-od' },
+    { icon: Trophy, label: 'Achievements', path: '/faculty/achievements' },
     ...(isTutor ? [
       { icon: Users, label: 'My Students', path: '/faculty/students' },
-      { icon: FileText, label: 'OD Requests', path: '/faculty/od-requests' },
+      { icon: FileText, label: 'Student OD', path: '/faculty/od-requests' },
       { icon: Phone, label: 'Parent Comms', path: '/faculty/parent-communication' },
       { icon: MessageSquare, label: 'Mentoring', path: '/faculty/mentoring' },
     ] : []),
