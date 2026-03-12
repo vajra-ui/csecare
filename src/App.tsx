@@ -101,6 +101,7 @@ function AppRoutes() {
       <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminReports /></ProtectedRoute>} />
       <Route path="/admin/risk-analysis" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminRiskAnalysis /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
+      <Route path="/admin/faculty-od" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminFacultyOD /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
       <Route path="/faculty" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyDashboard /></ProtectedRoute>} />
