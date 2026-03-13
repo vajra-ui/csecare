@@ -46,6 +46,8 @@ import FacultyODSubmit from "@/pages/faculty/FacultyODSubmit";
 
 // Admin extra
 import AdminFacultyOD from "@/pages/admin/AdminFacultyOD";
+import AdminAlumni from "@/pages/admin/AdminAlumni";
+import AdminShowcase from "@/pages/admin/AdminShowcase";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
