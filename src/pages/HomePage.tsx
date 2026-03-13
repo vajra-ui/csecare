@@ -4,6 +4,7 @@ import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AchievementGallery } from '@/components/AchievementGallery';
 
 export default function HomePage() {
   const navigate = useNavigate();
