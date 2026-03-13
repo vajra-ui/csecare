@@ -129,6 +129,11 @@ export default function HomePage() {
             <AnnouncementPanel />
           </div>
         </div>
+
+        {/* Achievement Gallery */}
+        <div className="mt-10">
+          <AchievementGallery />
+        </div>
       </main>
 
       <footer className="border-t border-border/50 mt-auto relative z-10">

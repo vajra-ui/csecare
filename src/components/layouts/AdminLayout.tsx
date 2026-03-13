@@ -28,6 +28,8 @@ const navItems = [
   { icon: FileSpreadsheet, label: 'Audit Logs', path: '/admin/audit-logs' },
   { icon: FileText, label: 'Reports', path: '/admin/reports' },
   { icon: Brain, label: 'AI Risk Analysis', path: '/admin/risk-analysis' },
+  { icon: UserCheck, label: 'Alumni Network', path: '/admin/alumni' },
+  { icon: Trophy, label: 'Achievements', path: '/admin/showcase' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
