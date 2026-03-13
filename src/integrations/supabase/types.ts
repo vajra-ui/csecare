@@ -62,6 +62,42 @@ export type Database = {
           },
         ]
       }
+      alumni: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          graduation_year: number
+          id: string
+          linkedin: string | null
+          location: string | null
+          name: string
+          role: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          graduation_year: number
+          id?: string
+          linkedin?: string | null
+          location?: string | null
+          name: string
+          role?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          graduation_year?: number
+          id?: string
+          linkedin?: string | null
+          location?: string | null
+          name?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_at: string
@@ -866,6 +902,45 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      showcase_achievements: {
+        Row: {
+          achievement_date: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          posted_by: string | null
+          student_name: string | null
+          title: string
+        }
+        Insert: {
+          achievement_date?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          posted_by?: string | null
+          student_name?: string | null
+          title: string
+        }
+        Update: {
+          achievement_date?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          posted_by?: string | null
+          student_name?: string | null
+          title?: string
         }
         Relationships: []
       }

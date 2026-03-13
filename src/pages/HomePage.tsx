@@ -4,6 +4,7 @@ import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AchievementGallery } from '@/components/AchievementGallery';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -127,6 +128,11 @@ export default function HomePage() {
           <div className="lg:col-span-1 animate-slide-up" style={{ animationDelay: '300ms' }}>
             <AnnouncementPanel />
           </div>
+        </div>
+
+        {/* Achievement Gallery */}
+        <div className="mt-10">
+          <AchievementGallery />
         </div>
       </main>
 

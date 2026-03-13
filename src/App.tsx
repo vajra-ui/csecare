@@ -46,6 +46,8 @@ import FacultyODSubmit from "@/pages/faculty/FacultyODSubmit";
 
 // Admin extra
 import AdminFacultyOD from "@/pages/admin/AdminFacultyOD";
+import AdminAlumni from "@/pages/admin/AdminAlumni";
+import AdminShowcase from "@/pages/admin/AdminShowcase";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
@@ -102,6 +104,8 @@ function AppRoutes() {
       <Route path="/admin/risk-analysis" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminRiskAnalysis /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSettings /></ProtectedRoute>} />
       <Route path="/admin/faculty-od" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminFacultyOD /></ProtectedRoute>} />
+      <Route path="/admin/alumni" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlumni /></ProtectedRoute>} />
+      <Route path="/admin/showcase" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShowcase /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
       <Route path="/faculty" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyDashboard /></ProtectedRoute>} />
