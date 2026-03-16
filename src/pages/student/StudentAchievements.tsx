@@ -37,8 +37,8 @@ export default function StudentAchievements() {
         const path = `achievements/${user!.studentId}/${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from('student-documents').upload(path, form.file);
         if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('student-documents').getPublicUrl(path);
-        certUrl = publicUrl;
+        // Private bucket - store path, use signed URLs to view
+        certUrl = path;
       }
       await supabase.from('student_achievements').insert({
         student_id: user!.studentId!, title: form.title, category: form.category,
