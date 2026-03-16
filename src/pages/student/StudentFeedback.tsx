@@ -30,15 +30,25 @@ export default function StudentFeedback() {
     if (!student) return;
     setStudentSection(student.section);
     // Get faculty teaching this section from timetable
-    const { data: tt } = await supabase.from('timetable').select('faculty_id, subject, faculty(id, name)').eq('section', student.section as any);
-    if (!tt) return;
-    const uniqueFaculty = new Map();
-    tt.forEach((t: any) => {
-      const f = t.faculty as any;
+    const { data: tt } = await supabase.from('timetable').select('faculty_id, subject').eq('section', student.section as any);
+    if (!tt || tt.length === 0) return;
+    
+    // Get unique faculty IDs
+    const facultyIds = [...new Set(tt.map(t => t.faculty_id))];
+    
+    // Fetch faculty details separately
+    const { data: facultyRecords } = await supabase.from('faculty').select('id, name').in('id', facultyIds);
+    if (!facultyRecords) return;
+    
+    const facultyMap = new Map(facultyRecords.map(f => [f.id, f]));
+    const uniqueFaculty = new Map<string, { id: string; name: string; subjects: string[] }>();
+    
+    tt.forEach(t => {
+      const f = facultyMap.get(t.faculty_id);
       if (f && !uniqueFaculty.has(f.id)) {
         uniqueFaculty.set(f.id, { id: f.id, name: f.name, subjects: [] });
       }
-      if (f) uniqueFaculty.get(f.id).subjects.push(t.subject);
+      if (f) uniqueFaculty.get(f.id)!.subjects.push(t.subject);
     });
     setFaculty(Array.from(uniqueFaculty.values()));
   };
