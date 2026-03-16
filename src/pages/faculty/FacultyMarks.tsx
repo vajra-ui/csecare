@@ -9,7 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Save, Search } from 'lucide-react';
+import { Save, Search, Upload, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { parseCSV, downloadCSV } from '@/lib/csvExport';
 
 export default function FacultyMarks() {
   const { user } = useAuth();
