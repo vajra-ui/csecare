@@ -27,6 +27,11 @@ export default function FacultyMarks() {
   const [scores, setScores] = useState<Record<string, { internal: string; external: string; grade: string }>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('marks');
+  const [bulkCsv, setBulkCsv] = useState('');
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [cgpaSemester, setCgpaSemester] = useState('1');
+  const [cgpaSection, setCgpaSection] = useState('');
 
   useEffect(() => {
     if (user?.facultyId) fetchFacultyInfo();
