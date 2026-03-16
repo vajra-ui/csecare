@@ -1,41 +1,29 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Loader2 } from 'lucide-react';
+import { TrendingUp, Loader2, Download } from 'lucide-react';
 import { StudentLayout } from '@/components/layouts/StudentLayout';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { downloadCSV } from '@/lib/csvExport';
+import { generateAcademicReportPDF } from '@/lib/pdfReports';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
-interface AcademicRecord {
-  id: string;
-  semester: number;
-  cgpa: number | null;
-  guidance_notes: string | null;
-}
-
-interface SubjectScore {
-  id: string;
-  subject_name: string;
-  semester: number;
-  internal_marks: number | null;
-  external_marks: number | null;
-  total_marks: number | null;
-  grade: string | null;
-}
+interface AcademicRecord { id: string; semester: number; cgpa: number | null; guidance_notes: string | null; }
+interface SubjectScore { id: string; subject_name: string; semester: number; internal_marks: number | null; external_marks: number | null; total_marks: number | null; grade: string | null; }
 
 export default function StudentProgress() {
   const { user } = useAuth();
   const [records, setRecords] = useState<AcademicRecord[]>([]);
   const [scores, setScores] = useState<SubjectScore[]>([]);
   const [loading, setLoading] = useState(true);
+  const [studentInfo, setStudentInfo] = useState<{ name: string; roll_number: string; section: string } | null>(null);
 
-  useEffect(() => {
-    fetchProgress();
-  }, [user]);
+  useEffect(() => { fetchProgress(); }, [user]);
 
   const fetchProgress = async () => {
     try {
@@ -43,12 +31,10 @@ export default function StudentProgress() {
       if (!authUser) return;
 
       const { data: studentData } = await supabase
-        .from('students')
-        .select('id')
-        .eq('user_id', authUser.id)
-        .single();
+        .from('students').select('id, name, roll_number, section').eq('user_id', authUser.id).single();
 
       if (studentData) {
+        setStudentInfo({ name: studentData.name, roll_number: studentData.roll_number, section: studentData.section });
         const [recordsRes, scoresRes] = await Promise.all([
           supabase.from('academic_records').select('*').eq('student_id', studentData.id).order('semester'),
           supabase.from('subject_scores').select('*').eq('student_id', studentData.id).order('semester').order('subject_name'),
@@ -65,11 +51,7 @@ export default function StudentProgress() {
 
   const latestCGPA = records.length > 0 ? records[records.length - 1]?.cgpa : null;
   const latestGuidance = records.length > 0 ? records[records.length - 1]?.guidance_notes : null;
-
-  const cgpaChartData = records.map(r => ({
-    semester: `Sem ${r.semester}`,
-    cgpa: r.cgpa || 0,
-  }));
+  const cgpaChartData = records.map(r => ({ semester: `Sem ${r.semester}`, cgpa: r.cgpa || 0 }));
 
   const scoresBySemester = scores.reduce((acc, score) => {
     if (!acc[score.semester]) acc[score.semester] = [];
@@ -77,7 +59,6 @@ export default function StudentProgress() {
     return acc;
   }, {} as Record<number, SubjectScore[]>);
 
-  // Latest semester subject-wise chart
   const latestSemScores = Object.keys(scoresBySemester).length > 0
     ? scoresBySemester[Math.max(...Object.keys(scoresBySemester).map(Number))]
     : [];
@@ -88,54 +69,77 @@ export default function StudentProgress() {
     external: s.external_marks || 0,
   }));
 
+  const handleDownloadCSV = () => {
+    downloadCSV(scores.map(s => ({
+      Semester: s.semester,
+      Subject: s.subject_name,
+      Internal: s.internal_marks ?? '',
+      External: s.external_marks ?? '',
+      Total: s.total_marks ?? '',
+      Grade: s.grade ?? '',
+    })), `academic-${studentInfo?.roll_number || 'report'}`);
+  };
+
+  const handleDownloadPDF = () => {
+    if (!studentInfo) return;
+    const semRecords = records.map(rec => ({
+      semester: rec.semester,
+      cgpa: rec.cgpa,
+      subjects: (scoresBySemester[rec.semester] || []).map(s => ({
+        name: s.subject_name,
+        internal: s.internal_marks,
+        external: s.external_marks,
+        total: s.total_marks,
+        grade: s.grade,
+      })),
+    }));
+    generateAcademicReportPDF(studentInfo.name, studentInfo.roll_number, studentInfo.section, semRecords);
+  };
+
   return (
     <StudentLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <TrendingUp className="h-7 w-7 text-info" />
-            Progress Check
-          </h1>
-          <p className="text-muted-foreground text-sm">View your academic progress and CGPA</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <TrendingUp className="h-7 w-7 text-primary" />
+              Progress Check
+            </h1>
+            <p className="text-muted-foreground text-sm">View your academic progress and CGPA</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleDownloadCSV} disabled={scores.length === 0}>
+              <Download className="h-4 w-4 mr-1" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleDownloadPDF} disabled={records.length === 0}>
+              <Download className="h-4 w-4 mr-1" /> PDF
+            </Button>
+          </div>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
+          <div className="flex items-center justify-center py-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
         ) : (
           <>
-            {/* CGPA Summary */}
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Current CGPA</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Current CGPA</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-primary">
-                    {latestCGPA !== null ? latestCGPA.toFixed(2) : '-'}
-                  </div>
+                  <div className="text-4xl font-bold text-primary">{latestCGPA !== null ? latestCGPA.toFixed(2) : '-'}</div>
                   <p className="text-sm text-muted-foreground mt-1">Out of 10.00</p>
                 </CardContent>
               </Card>
               {latestGuidance && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Tutor Guidance Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{latestGuidance}</p>
-                  </CardContent>
+                  <CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Tutor Guidance Notes</CardTitle></CardHeader>
+                  <CardContent><p className="text-sm">{latestGuidance}</p></CardContent>
                 </Card>
               )}
             </div>
 
-            {/* CGPA Trend Chart */}
             {cgpaChartData.length > 1 && (
               <Card>
-                <CardHeader>
-                  <CardTitle>CGPA Trend</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>CGPA Trend</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={cgpaChartData}>
@@ -143,19 +147,16 @@ export default function StudentProgress() {
                       <XAxis dataKey="semester" className="text-xs" />
                       <YAxis domain={[0, 10]} className="text-xs" />
                       <Tooltip />
-                      <Line type="monotone" dataKey="cgpa" stroke="hsl(348, 75%, 35%)" strokeWidth={2} dot={{ r: 5 }} />
+                      <Line type="monotone" dataKey="cgpa" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 5 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
             )}
 
-            {/* Subject-wise Performance Chart */}
             {subjectChartData.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle>Latest Semester - Subject Performance</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Latest Semester - Subject Performance</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={subjectChartData}>
@@ -163,7 +164,7 @@ export default function StudentProgress() {
                       <XAxis dataKey="subject" className="text-xs" angle={-20} textAnchor="end" height={60} />
                       <YAxis className="text-xs" />
                       <Tooltip />
-                      <Bar dataKey="internal" name="Internal" fill="hsl(210, 85%, 50%)" stackId="a" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="internal" name="Internal" fill="hsl(210, 85%, 50%)" stackId="a" />
                       <Bar dataKey="external" name="External" fill="hsl(142, 70%, 40%)" stackId="a" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -171,7 +172,6 @@ export default function StudentProgress() {
               </Card>
             )}
 
-            {/* CGPA History Pills */}
             {records.length > 0 && (
               <Card>
                 <CardHeader><CardTitle>Semester-wise CGPA</CardTitle></CardHeader>
@@ -188,7 +188,6 @@ export default function StudentProgress() {
               </Card>
             )}
 
-            {/* Subject Scores Tables */}
             {Object.keys(scoresBySemester).length > 0 ? (
               Object.entries(scoresBySemester).map(([semester, semesterScores]) => (
                 <Card key={semester}>

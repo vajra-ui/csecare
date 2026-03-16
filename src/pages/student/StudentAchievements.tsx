@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StudentLayout } from '@/components/layouts/StudentLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trophy, Award, Upload } from 'lucide-react';
+import { Plus, Trophy, Award, Download } from 'lucide-react';
+import { downloadCSV } from '@/lib/csvExport';
 
 export default function StudentAchievements() {
   const { user } = useAuth();
@@ -37,19 +38,29 @@ export default function StudentAchievements() {
         const path = `achievements/${user!.studentId}/${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from('student-documents').upload(path, form.file);
         if (error) throw error;
-        // Private bucket - store path, use signed URLs to view
         certUrl = path;
       }
-      await supabase.from('student_achievements').insert({
+      const { error: insertError } = await supabase.from('student_achievements').insert({
         student_id: user!.studentId!, title: form.title, category: form.category,
         description: form.description || null, date: form.date, certificate_url: certUrl,
       });
+      if (insertError) throw insertError;
       toast({ title: 'Added', description: 'Achievement recorded!' });
       setOpen(false);
       setForm({ title: '', category: 'academic', description: '', date: '', file: null });
       fetchAchievements();
     } catch (e: any) { toast({ title: 'Error', description: e.message, variant: 'destructive' }); }
     setLoading(false);
+  };
+
+  const handleDownload = () => {
+    downloadCSV(achievements.map(a => ({
+      Title: a.title,
+      Category: a.category,
+      Date: new Date(a.date).toLocaleDateString(),
+      Description: a.description || '',
+      Verified: a.verified ? 'Yes' : 'No',
+    })), 'my-achievements');
   };
 
   const categoryIcons: Record<string, string> = { academic: '📚', sports: '🏆', cultural: '🎭', technical: '💻', other: '⭐' };
@@ -63,38 +74,43 @@ export default function StudentAchievements() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl md:text-3xl font-bold">Achievement Portfolio</h1>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Add Achievement</Button></DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Add Achievement</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <Input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-                <div className="grid grid-cols-2 gap-4">
-                  <Select value={form.category} onValueChange={v => setForm({ ...form, category: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="academic">Academic</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="cultural">Cultural</SelectItem>
-                      <SelectItem value="technical">Technical</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleDownload} disabled={achievements.length === 0}>
+              <Download className="h-4 w-4 mr-1" /> Export
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Add</Button></DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Add Achievement</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <Input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Select value={form.category} onValueChange={v => setForm({ ...form, category: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="academic">Academic</SelectItem>
+                        <SelectItem value="sports">Sports</SelectItem>
+                        <SelectItem value="cultural">Cultural</SelectItem>
+                        <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+                  </div>
+                  <Textarea placeholder="Description (optional)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                  <div>
+                    <label className="text-sm text-muted-foreground">Certificate (optional)</label>
+                    <Input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={e => setForm({ ...form, file: e.target.files?.[0] || null })} />
+                  </div>
+                  <Button onClick={addAchievement} disabled={loading} className="w-full">{loading ? 'Saving...' : 'Save Achievement'}</Button>
                 </div>
-                <Textarea placeholder="Description (optional)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-                <div>
-                  <label className="text-sm text-muted-foreground">Certificate (optional)</label>
-                  <Input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={e => setForm({ ...form, file: e.target.files?.[0] || null })} />
-                </div>
-                <Button onClick={addAchievement} disabled={loading} className="w-full">{loading ? 'Saving...' : 'Save Achievement'}</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{achievements.length}</p><p className="text-xs text-muted-foreground">Total Achievements</p></CardContent></Card>
+          <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{achievements.length}</p><p className="text-xs text-muted-foreground">Total</p></CardContent></Card>
           <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{achievements.filter(a => a.verified).length}</p><p className="text-xs text-muted-foreground">Verified</p></CardContent></Card>
           <Card><CardContent className="pt-6 text-center"><p className="text-2xl font-bold">{new Set(achievements.map(a => a.category)).size}</p><p className="text-xs text-muted-foreground">Categories</p></CardContent></Card>
         </div>
@@ -107,7 +123,7 @@ export default function StudentAchievements() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {achievements.map(a => (
-              <Card key={a.id} className="overflow-hidden">
+              <Card key={a.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-3">
                     <span className="text-2xl">{categoryIcons[a.category] || '⭐'}</span>
