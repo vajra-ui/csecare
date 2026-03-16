@@ -37,8 +37,8 @@ export default function StudentAchievements() {
         const path = `achievements/${user!.studentId}/${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from('student-documents').upload(path, form.file);
         if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('student-documents').getPublicUrl(path);
-        certUrl = publicUrl;
+        // Private bucket - store path, use signed URLs to view
+        certUrl = path;
       }
       await supabase.from('student_achievements').insert({
         student_id: user!.studentId!, title: form.title, category: form.category,
@@ -121,8 +121,11 @@ export default function StudentAchievements() {
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString('en-IN')}</span>
                     {a.certificate_url && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={a.certificate_url} target="_blank" rel="noreferrer"><Award className="h-3 w-3 mr-1" /> View Cert</a>
+                      <Button variant="outline" size="sm" onClick={async () => {
+                        const { data } = await supabase.storage.from('student-documents').createSignedUrl(a.certificate_url, 3600);
+                        if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                      }}>
+                        <Award className="h-3 w-3 mr-1" /> View Cert
                       </Button>
                     )}
                   </div>

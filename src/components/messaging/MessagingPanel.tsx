@@ -86,25 +86,37 @@ export function MessagingPanel() {
       const { data: student } = await supabase.from('students').select('section, tutor_id').eq('user_id', currentUserId).single();
       if (!student) return;
 
-      const { data: facultyList } = await supabase
-        .from('timetable')
-        .select('faculty_id, faculty(id, name, faculty_id, user_id, is_tutor)')
-        .eq('section', student.section as any);
-
-      const uniqueFaculty = new Map();
-      (facultyList || []).forEach((t: any) => {
-        const f = t.faculty as any;
-        if (f?.user_id && !uniqueFaculty.has(f.user_id)) {
-          uniqueFaculty.set(f.user_id, {
-            user_id: f.user_id,
-            name: f.name,
-            role: f.is_tutor ? 'Tutor' : 'Faculty',
-            identifier: f.faculty_id,
+      // Always add tutor first if assigned
+      if (student.tutor_id) {
+        const { data: tutor } = await supabase.from('faculty').select('id, name, faculty_id, user_id, is_tutor').eq('id', student.tutor_id).single();
+        if (tutor?.user_id) {
+          contactList.push({
+            user_id: tutor.user_id,
+            name: tutor.name,
+            role: '⭐ Your Tutor',
+            identifier: tutor.faculty_id,
             unread: 0,
           });
         }
-      });
-      contactList = Array.from(uniqueFaculty.values());
+      }
+
+      // Get faculty from timetable
+      const { data: tt } = await supabase.from('timetable').select('faculty_id, subject').eq('section', student.section as any);
+      if (tt && tt.length > 0) {
+        const facultyIds = [...new Set(tt.map(t => t.faculty_id))];
+        const { data: facultyRecords } = await supabase.from('faculty').select('id, name, faculty_id, user_id, is_tutor').in('id', facultyIds);
+        (facultyRecords || []).forEach(f => {
+          if (f.user_id && !contactList.find(c => c.user_id === f.user_id)) {
+            contactList.push({
+              user_id: f.user_id,
+              name: f.name,
+              role: f.is_tutor ? 'Tutor' : 'Faculty',
+              identifier: f.faculty_id,
+              unread: 0,
+            });
+          }
+        });
+      }
     } else if (user?.role === 'FACULTY' || user?.role === 'TUTOR') {
       // Faculty see students in their sections + other faculty
       const { data: faculty } = await supabase.from('faculty').select('id, section').eq('user_id', currentUserId).single();
