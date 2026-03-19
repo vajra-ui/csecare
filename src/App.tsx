@@ -43,11 +43,19 @@ import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
 import FacultyMessages from "@/pages/faculty/FacultyMessages";
 import FacultyAchievements from "@/pages/faculty/FacultyAchievements";
 import FacultyODSubmit from "@/pages/faculty/FacultyODSubmit";
+import FacultyAnnouncements from "@/pages/faculty/FacultyAnnouncements";
+import TutorAbsenceReports from "@/pages/faculty/TutorAbsenceReports";
+import TutorWeeklyReports from "@/pages/faculty/TutorWeeklyReports";
 
 // Admin extra
 import AdminFacultyOD from "@/pages/admin/AdminFacultyOD";
 import AdminAlumni from "@/pages/admin/AdminAlumni";
 import AdminShowcase from "@/pages/admin/AdminShowcase";
+import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
+import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
+
+// Student extra
+import StudentActivities from "@/pages/student/StudentActivities";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
