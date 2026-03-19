@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      absence_reports: {
+        Row: {
+          created_at: string
+          date: string
+          hours_absent: number[] | null
+          id: string
+          leave_type: string
+          reason: string | null
+          reported_at: string | null
+          student_id: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          hours_absent?: number[] | null
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          reported_at?: string | null
+          student_id: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          hours_absent?: number[] | null
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          reported_at?: string | null
+          student_id?: string
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absence_reports_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_reports_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       academic_records: {
         Row: {
           cgpa: number | null
@@ -998,6 +1052,66 @@ export type Database = {
           },
         ]
       }
+      student_activities: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          event_date: string
+          id: string
+          proof_file_name: string | null
+          proof_url: string | null
+          status: string
+          student_id: string
+          title: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_date: string
+          id?: string
+          proof_file_name?: string | null
+          proof_url?: string | null
+          status?: string
+          student_id: string
+          title: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          proof_file_name?: string | null
+          proof_url?: string | null
+          status?: string
+          student_id?: string
+          title?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_activities_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_activities_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_documents: {
         Row: {
           category: string
@@ -1155,6 +1269,73 @@ export type Database = {
           },
         ]
       }
+      substitute_allocations: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          date: string
+          hour_number: number
+          id: string
+          leave_id: string
+          original_faculty_id: string
+          section: string
+          status: string
+          subject: string
+          substitute_faculty_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          date: string
+          hour_number: number
+          id?: string
+          leave_id: string
+          original_faculty_id: string
+          section: string
+          status?: string
+          subject: string
+          substitute_faculty_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          date?: string
+          hour_number?: number
+          id?: string
+          leave_id?: string
+          original_faculty_id?: string
+          section?: string
+          status?: string
+          subject?: string
+          substitute_faculty_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "substitute_allocations_leave_id_fkey"
+            columns: ["leave_id"]
+            isOneToOne: false
+            referencedRelation: "faculty_leaves"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitute_allocations_original_faculty_id_fkey"
+            columns: ["original_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitute_allocations_substitute_faculty_id_fkey"
+            columns: ["substitute_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timetable: {
         Row: {
           created_at: string
@@ -1213,6 +1394,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      weekly_reports: {
+        Row: {
+          activities_count: number | null
+          attendance_percentage: number | null
+          created_at: string
+          id: string
+          status: string
+          student_id: string
+          tutor_comments: string | null
+          updated_at: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          activities_count?: number | null
+          attendance_percentage?: number | null
+          created_at?: string
+          id?: string
+          status?: string
+          student_id: string
+          tutor_comments?: string | null
+          updated_at?: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          activities_count?: number | null
+          attendance_percentage?: number | null
+          created_at?: string
+          id?: string
+          status?: string
+          student_id?: string
+          tutor_comments?: string | null
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_reports_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
