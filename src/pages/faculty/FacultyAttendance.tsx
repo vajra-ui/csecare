@@ -165,7 +165,7 @@ export default function FacultyAttendance() {
       const absentStudentIds = students.filter(s => !attendance[s.id]).map(s => s.id);
       if (absentStudentIds.length > 0) {
         // Find tutor for this section
-        const { data: tutor } = await supabase.from('faculty').select('user_id').eq('section', selectedSection).eq('is_tutor', true).single();
+        const { data: tutor } = await supabase.from('faculty').select('user_id').eq('section', selectedSection as any).eq('is_tutor', true).single();
         if (tutor?.user_id) {
           const absentNames = students.filter(s => !attendance[s.id]).map(s => s.name).join(', ');
           await supabase.from('notifications').insert({
