@@ -43,11 +43,19 @@ import FacultyMentoring from "@/pages/faculty/FacultyMentoring";
 import FacultyMessages from "@/pages/faculty/FacultyMessages";
 import FacultyAchievements from "@/pages/faculty/FacultyAchievements";
 import FacultyODSubmit from "@/pages/faculty/FacultyODSubmit";
+import FacultyAnnouncements from "@/pages/faculty/FacultyAnnouncements";
+import TutorAbsenceReports from "@/pages/faculty/TutorAbsenceReports";
+import TutorWeeklyReports from "@/pages/faculty/TutorWeeklyReports";
 
 // Admin extra
 import AdminFacultyOD from "@/pages/admin/AdminFacultyOD";
 import AdminAlumni from "@/pages/admin/AdminAlumni";
 import AdminShowcase from "@/pages/admin/AdminShowcase";
+import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
+import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
+
+// Student extra
+import StudentActivities from "@/pages/student/StudentActivities";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/StudentDashboard";
@@ -106,6 +114,8 @@ function AppRoutes() {
       <Route path="/admin/faculty-od" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminFacultyOD /></ProtectedRoute>} />
       <Route path="/admin/alumni" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlumni /></ProtectedRoute>} />
       <Route path="/admin/showcase" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShowcase /></ProtectedRoute>} />
+      <Route path="/admin/substitutes" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSubstitutes /></ProtectedRoute>} />
+      <Route path="/admin/absence-reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAbsenceReports /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
       <Route path="/faculty" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyDashboard /></ProtectedRoute>} />
@@ -123,6 +133,9 @@ function AppRoutes() {
       <Route path="/faculty/messages" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyMessages /></ProtectedRoute>} />
       <Route path="/faculty/achievements" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyAchievements /></ProtectedRoute>} />
       <Route path="/faculty/my-od" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyODSubmit /></ProtectedRoute>} />
+      <Route path="/faculty/announcements" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyAnnouncements /></ProtectedRoute>} />
+      <Route path="/faculty/absence-reports" element={<ProtectedRoute allowedRoles={['TUTOR']}><TutorAbsenceReports /></ProtectedRoute>} />
+      <Route path="/faculty/weekly-reports" element={<ProtectedRoute allowedRoles={['TUTOR']}><TutorWeeklyReports /></ProtectedRoute>} />
       
       {/* Student Routes */}
       <Route path="/student" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDashboard /></ProtectedRoute>} />
@@ -138,6 +151,7 @@ function AppRoutes() {
       <Route path="/student/exam-timetable" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentExamTimetable /></ProtectedRoute>} />
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
       <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
+      <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

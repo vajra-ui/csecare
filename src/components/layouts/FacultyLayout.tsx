@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare, Mail, Trophy, CalendarClock,
+  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare, Mail, Trophy, CalendarClock, Megaphone, AlertTriangle, BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,9 +37,12 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: CalendarOff, label: 'Leave', path: '/faculty/leave' },
     { icon: CalendarClock, label: 'My OD Requests', path: '/faculty/my-od' },
     { icon: Trophy, label: 'Achievements', path: '/faculty/achievements' },
+    { icon: Megaphone, label: 'Announcements', path: '/faculty/announcements' },
     ...(isTutor ? [
       { icon: Users, label: 'My Students', path: '/faculty/students' },
       { icon: FileText, label: 'Student OD', path: '/faculty/od-requests' },
+      { icon: AlertTriangle, label: 'Absence Reports', path: '/faculty/absence-reports' },
+      { icon: BarChart3, label: 'Weekly Reports', path: '/faculty/weekly-reports' },
       { icon: Phone, label: 'Parent Comms', path: '/faculty/parent-communication' },
       { icon: MessageSquare, label: 'Mentoring', path: '/faculty/mentoring' },
     ] : []),

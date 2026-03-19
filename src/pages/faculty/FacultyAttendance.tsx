@@ -161,9 +161,26 @@ export default function FacultyAttendance() {
 
       if (error) throw error;
 
+      // Auto-notify tutor about absent students
+      const absentStudentIds = students.filter(s => !attendance[s.id]).map(s => s.id);
+      if (absentStudentIds.length > 0) {
+        // Find tutor for this section
+        const { data: tutor } = await supabase.from('faculty').select('user_id').eq('section', selectedSection as any).eq('is_tutor', true).single();
+        if (tutor?.user_id) {
+          const absentNames = students.filter(s => !attendance[s.id]).map(s => s.name).join(', ');
+          await supabase.from('notifications').insert({
+            user_id: tutor.user_id,
+            title: `${absentStudentIds.length} Absent - Hour ${selectedHour}`,
+            message: `Absent students in ${selectedSection} for ${subject} (Hour ${selectedHour}): ${absentNames}`,
+            type: 'warning',
+            link: '/faculty/absence-reports',
+          });
+        }
+      }
+
       toast({
         title: 'Attendance Saved',
-        description: `Marked attendance for ${students.length} students.`,
+        description: `Marked attendance for ${students.length} students.${absentStudentIds.length > 0 ? ` ${absentStudentIds.length} absent - tutor notified.` : ''}`,
       });
 
       setExistingAttendance(students.map(s => s.id));

@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Users, GraduationCap, Megaphone, Settings, LogOut, LayoutDashboard,
-  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck,
+  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck, AlertTriangle, UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,8 @@ const navItems = [
   { icon: Megaphone, label: 'Announcements', path: '/admin/announcements' },
   { icon: ClipboardList, label: 'Student OD', path: '/admin/od-requests' },
   { icon: CalendarOff, label: 'Faculty OD', path: '/admin/faculty-od' },
+  { icon: UserCog, label: 'Substitutes', path: '/admin/substitutes' },
+  { icon: AlertTriangle, label: 'Absence Reports', path: '/admin/absence-reports' },
   { icon: FileSpreadsheet, label: 'Audit Logs', path: '/admin/audit-logs' },
   { icon: FileText, label: 'Reports', path: '/admin/reports' },
   { icon: Brain, label: 'AI Risk Analysis', path: '/admin/risk-analysis' },
