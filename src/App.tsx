@@ -151,6 +151,7 @@ function AppRoutes() {
       <Route path="/student/exam-timetable" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentExamTimetable /></ProtectedRoute>} />
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
       <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
+      <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
