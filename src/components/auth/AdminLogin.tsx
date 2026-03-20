@@ -65,7 +65,9 @@ export function AdminLogin() {
     }
   };
 
-  const handleTransitionComplete = useCallback(() => navigate('/admin'), [navigate]);
+  const handleTransitionComplete = useCallback(() => {
+    navigate(adminRole === 'COE Cell' ? '/coe' : '/admin');
+  }, [navigate, adminRole]);
 
   return (
     <>
