@@ -158,6 +158,11 @@ function AppRoutes() {
       <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
       <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
       
+      {/* COE Routes */}
+      <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />
+      <Route path="/coe/upload" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEUpload /></ProtectedRoute>} />
+      <Route path="/coe/published" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEPublished /></ProtectedRoute>} />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
