@@ -54,6 +54,11 @@ import AdminShowcase from "@/pages/admin/AdminShowcase";
 import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
 
+// COE Pages
+import COEDashboard from "@/pages/coe/COEDashboard";
+import COEUpload from "@/pages/coe/COEUpload";
+import COEPublished from "@/pages/coe/COEPublished";
+
 // Student extra
 import StudentActivities from "@/pages/student/StudentActivities";
 
