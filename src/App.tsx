@@ -54,6 +54,11 @@ import AdminShowcase from "@/pages/admin/AdminShowcase";
 import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
 
+// COE Pages
+import COEDashboard from "@/pages/coe/COEDashboard";
+import COEUpload from "@/pages/coe/COEUpload";
+import COEPublished from "@/pages/coe/COEPublished";
+
 // Student extra
 import StudentActivities from "@/pages/student/StudentActivities";
 
@@ -152,6 +157,11 @@ function AppRoutes() {
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
       <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
       <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
+      
+      {/* COE Routes */}
+      <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />
+      <Route path="/coe/upload" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEUpload /></ProtectedRoute>} />
+      <Route path="/coe/published" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEPublished /></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

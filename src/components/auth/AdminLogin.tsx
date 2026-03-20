@@ -39,8 +39,8 @@ export function AdminLogin() {
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
     defaultValues: {
-      email: adminRole === 'HOD' ? 'vajraofficial7@gmail.com' : '',
-      password: adminRole === 'HOD' ? 'admin@2026' : '',
+      email: adminRole === 'HOD' ? 'vajraofficial7@gmail.com' : adminRole === 'COE Cell' ? 'coe@gmail.com' : '',
+      password: adminRole === 'HOD' ? 'admin@2026' : adminRole === 'COE Cell' ? 'coe@2026' : '',
     },
   });
 
@@ -65,7 +65,9 @@ export function AdminLogin() {
     }
   };
 
-  const handleTransitionComplete = useCallback(() => navigate('/admin'), [navigate]);
+  const handleTransitionComplete = useCallback(() => {
+    navigate(adminRole === 'COE Cell' ? '/coe' : '/admin');
+  }, [navigate, adminRole]);
 
   return (
     <>

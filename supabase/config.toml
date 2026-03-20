@@ -2,3 +2,6 @@ project_id = "astvgqenzggnqgrkggzm"
 
 [functions.ai-student-advisor]
 verify_jwt = false
+
+[functions.create-coe]
+verify_jwt = false
