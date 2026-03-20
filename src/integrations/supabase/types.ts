@@ -120,34 +120,43 @@ export type Database = {
         Row: {
           company: string | null
           created_at: string
+          department: string | null
           email: string | null
           graduation_year: number
           id: string
           linkedin: string | null
           location: string | null
           name: string
+          phone: string | null
+          profile_image_url: string | null
           role: string | null
         }
         Insert: {
           company?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           graduation_year: number
           id?: string
           linkedin?: string | null
           location?: string | null
           name: string
+          phone?: string | null
+          profile_image_url?: string | null
           role?: string | null
         }
         Update: {
           company?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           graduation_year?: number
           id?: string
           linkedin?: string | null
           location?: string | null
           name?: string
+          phone?: string | null
+          profile_image_url?: string | null
           role?: string | null
         }
         Relationships: []
@@ -958,6 +967,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      results: {
+        Row: {
+          created_at: string
+          grade: string | null
+          id: string
+          is_published: boolean
+          marks: number | null
+          published_at: string | null
+          published_by: string | null
+          semester: number
+          student_id: string
+          subject_code: string
+          subject_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          is_published?: boolean
+          marks?: number | null
+          published_at?: string | null
+          published_by?: string | null
+          semester: number
+          student_id: string
+          subject_code: string
+          subject_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          is_published?: boolean
+          marks?: number | null
+          published_at?: string | null
+          published_by?: string | null
+          semester?: number
+          student_id?: string
+          subject_code?: string
+          subject_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       showcase_achievements: {
         Row: {
