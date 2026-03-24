@@ -40,7 +40,10 @@ export default function FacultyLeave() {
 
   const applyLeave = async () => {
     if (!form.start_date || !form.end_date || !form.reason) {
-      toast({ title: 'Missing fields', variant: 'destructive' }); return;
+      toast({ title: 'Missing fields', description: 'Please fill all required fields.', variant: 'destructive' }); return;
+    }
+    if (new Date(form.end_date) < new Date(form.start_date)) {
+      toast({ title: 'Invalid dates', description: 'End date cannot be before start date.', variant: 'destructive' }); return;
     }
     setLoading(true);
     try {

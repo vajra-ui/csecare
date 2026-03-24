@@ -89,6 +89,21 @@ export default function StudentUpload() {
       return;
     }
 
+    // Server-side file type validation
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'zip', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'txt'];
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!ext || !allowedExtensions.includes(ext)) {
+      toast({ title: 'Invalid file type', description: `Only ${allowedExtensions.join(', ')} files are allowed.`, variant: 'destructive' });
+      return;
+    }
+
+    // Block executable or dangerous file types
+    const dangerousTypes = ['exe', 'bat', 'cmd', 'sh', 'js', 'vbs', 'msi', 'jar', 'php', 'py', 'rb'];
+    if (dangerousTypes.includes(ext)) {
+      toast({ title: 'Blocked', description: 'This file type is not allowed for security reasons.', variant: 'destructive' });
+      return;
+    }
+
     setUploading(true);
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
