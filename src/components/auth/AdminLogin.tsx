@@ -186,10 +186,16 @@ export function AdminLogin() {
                     </FormItem>
                   )}
                 />
+                {rateLimited && (
+                  <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                    <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                    <span>Too many attempts. Try again in {Math.ceil(lockoutSeconds / 60)} min {lockoutSeconds % 60}s</span>
+                  </div>
+                )}
                 <Button
                   type="submit"
                   className="w-full gradient-primary"
-                  disabled={loading}
+                  disabled={loading || rateLimited}
                 >
                   {loading ? (
                     <>
@@ -200,6 +206,11 @@ export function AdminLogin() {
                     'Sign In'
                   )}
                 </Button>
+                <div className="text-center">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </form>
             </Form>
           </CardContent>

@@ -155,25 +155,7 @@ export default function AdminDashboard() {
               <Server className="h-4 w-4 text-neon-green" />
               <h2 className="font-display text-lg font-semibold tracking-wide">System Status</h2>
             </div>
-            <div className="futuristic-card p-5 neon-border animate-scan-line">
-              <div className="space-y-4">
-                {[
-                  { label: 'Database', status: 'Operational', color: 'text-neon-green' },
-                  { label: 'Authentication', status: 'Active', color: 'text-neon-green' },
-                  { label: 'File Storage', status: 'Ready', color: 'text-neon-green' },
-                  { label: 'Edge Functions', status: 'Running', color: 'text-neon-cyan' },
-                  { label: 'Realtime', status: 'Connected', color: 'text-neon-cyan' },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between">
-                    <span className="text-sm font-body text-muted-foreground">{item.label}</span>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full bg-neon-green animate-pulse-subtle`} />
-                      <span className={`text-xs font-body font-medium ${item.color}`}>{item.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SystemHealthCard />
           </div>
         </div>
       </div>
