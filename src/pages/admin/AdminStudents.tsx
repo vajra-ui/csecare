@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
