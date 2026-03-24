@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { adminLogin } from '@/lib/auth';
+import { checkRateLimit, recordFailedAttempt, resetAttempts } from '@/lib/rateLimiter';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
