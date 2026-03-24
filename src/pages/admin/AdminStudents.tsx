@@ -478,6 +478,13 @@ export default function AdminStudents() {
                 </Table>
               </div>
             )}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalCount / PAGE_SIZE)}
+              onPageChange={setCurrentPage}
+              totalItems={totalCount}
+              pageSize={PAGE_SIZE}
+            />
           </CardContent>
         </Card>
       </div>
