@@ -117,7 +117,7 @@ export default function AdminStudents() {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [currentPage]);
 
   const fetchStudents = async () => {
     try {
