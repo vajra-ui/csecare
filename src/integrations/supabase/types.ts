@@ -1521,6 +1521,17 @@ export type Database = {
         Returns: boolean
       }
       is_tutor: { Args: { _user_id: string }; Returns: boolean }
+      save_attendance_atomic: {
+        Args: {
+          _date: string
+          _faculty_id: string
+          _hour_number: number
+          _records: Json
+          _section: string
+          _subject: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       announcement_priority: "info" | "important" | "urgent"
