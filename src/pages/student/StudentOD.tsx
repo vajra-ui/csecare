@@ -30,9 +30,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 const odSchema = z.object({
-  reason: z.string().min(10, 'Reason must be at least 10 characters'),
+  reason: z.string().min(10, 'Reason must be at least 10 characters').max(1000, 'Reason must be less than 1000 characters'),
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
+}).refine(data => new Date(data.endDate) >= new Date(data.startDate), {
+  message: 'End date cannot be before start date',
+  path: ['endDate'],
 });
 
 type ODFormData = z.infer<typeof odSchema>;

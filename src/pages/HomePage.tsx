@@ -139,7 +139,7 @@ export default function HomePage() {
       <footer className="border-t border-border/50 mt-auto relative z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground font-body tracking-wider">
-            <p>© 2025 Paavai Engineering College. All rights reserved.</p>
+            <p>© 2026 Paavai Engineering College. All rights reserved.</p>
             <div className="flex items-center gap-2">
               <Sparkles className="h-3 w-3 text-neon-cyan" />
               <p>Department of Computer Science & Engineering</p>

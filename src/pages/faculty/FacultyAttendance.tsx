@@ -131,15 +131,20 @@ export default function FacultyAttendance() {
     setSaving(true);
     try {
       // Get faculty ID
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Not authenticated');
+
       const { data: facultyData } = await supabase
         .from('faculty')
         .select('id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('user_id', authUser.id)
         .single();
+
+      if (!facultyData) throw new Error('Faculty record not found');
 
       const records = students.map(student => ({
         student_id: student.id,
-        faculty_id: facultyData?.id,
+        faculty_id: facultyData.id,
         date: selectedDate,
         hour_number: parseInt(selectedHour),
         subject: subject.trim(),

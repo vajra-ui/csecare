@@ -86,6 +86,13 @@ export default function StudentAssignments() {
       return;
     }
 
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'zip', 'ppt', 'pptx', 'txt'];
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExt || !allowedExtensions.includes(fileExt)) {
+      toast({ title: 'Invalid file type', description: 'Only PDF, DOC, DOCX, ZIP, PPT, PPTX, TXT files are allowed.', variant: 'destructive' });
+      return;
+    }
+
     setUploading(true);
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
