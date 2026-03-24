@@ -144,25 +144,18 @@ export default function FacultyAttendance() {
 
       const records = students.map(student => ({
         student_id: student.id,
-        faculty_id: facultyData.id,
-        date: selectedDate,
-        hour_number: parseInt(selectedHour),
-        subject: subject.trim(),
         is_present: attendance[student.id] || false,
       }));
 
-      // Delete existing records for this date/hour
-      if (existingAttendance.length > 0) {
-        await supabase
-          .from('attendance')
-          .delete()
-          .eq('date', selectedDate)
-          .eq('hour_number', parseInt(selectedHour))
-          .in('student_id', students.map(s => s.id));
-      }
-
-      // Insert new records
-      const { error } = await supabase.from('attendance').insert(records);
+      // Atomic save via RPC (transactional delete + insert)
+      const { data: rpcResult, error } = await supabase.rpc('save_attendance_atomic', {
+        _faculty_id: facultyData.id,
+        _date: selectedDate,
+        _hour_number: parseInt(selectedHour),
+        _subject: subject.trim(),
+        _section: selectedSection,
+        _records: records,
+      });
 
       if (error) throw error;
 

@@ -5,6 +5,85 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { useCallback } from 'react';
+
+interface HealthStatus {
+  label: string;
+  status: 'Operational' | 'Degraded' | 'Down' | 'Checking';
+  color: string;
+}
+
+function SystemHealthCard() {
+  const [healthChecks, setHealthChecks] = useState<HealthStatus[]>([
+    { label: 'Database', status: 'Checking', color: 'text-muted-foreground' },
+    { label: 'Authentication', status: 'Checking', color: 'text-muted-foreground' },
+    { label: 'File Storage', status: 'Checking', color: 'text-muted-foreground' },
+  ]);
+
+  const runChecks = useCallback(async () => {
+    const checks: HealthStatus[] = [];
+
+    // DB check
+    try {
+      const { error } = await supabase.from('announcements').select('id', { count: 'exact', head: true });
+      checks.push(error
+        ? { label: 'Database', status: 'Degraded', color: 'text-warning' }
+        : { label: 'Database', status: 'Operational', color: 'text-neon-green' }
+      );
+    } catch {
+      checks.push({ label: 'Database', status: 'Down', color: 'text-destructive' });
+    }
+
+    // Auth check
+    try {
+      const { data } = await supabase.auth.getSession();
+      checks.push(data.session
+        ? { label: 'Authentication', status: 'Operational', color: 'text-neon-green' }
+        : { label: 'Authentication', status: 'Degraded', color: 'text-warning' }
+      );
+    } catch {
+      checks.push({ label: 'Authentication', status: 'Down', color: 'text-destructive' });
+    }
+
+    // Storage check
+    try {
+      const { error } = await supabase.storage.listBuckets();
+      checks.push(error
+        ? { label: 'File Storage', status: 'Degraded', color: 'text-warning' }
+        : { label: 'File Storage', status: 'Operational', color: 'text-neon-green' }
+      );
+    } catch {
+      checks.push({ label: 'File Storage', status: 'Down', color: 'text-destructive' });
+    }
+
+    setHealthChecks(checks);
+  }, []);
+
+  useEffect(() => { runChecks(); }, [runChecks]);
+
+  const statusDotColor = (status: string) => {
+    if (status === 'Operational') return 'bg-neon-green';
+    if (status === 'Degraded') return 'bg-warning';
+    if (status === 'Down') return 'bg-destructive';
+    return 'bg-muted-foreground';
+  };
+
+  return (
+    <div className="futuristic-card p-5 neon-border">
+      <div className="space-y-4">
+        {healthChecks.map((item) => (
+          <div key={item.label} className="flex items-center justify-between">
+            <span className="text-sm font-body text-muted-foreground">{item.label}</span>
+            <div className="flex items-center gap-2">
+              <div className={`h-2 w-2 rounded-full ${statusDotColor(item.status)} ${item.status === 'Checking' ? 'animate-pulse' : 'animate-pulse-subtle'}`} />
+              <span className={`text-xs font-body font-medium ${item.color}`}>{item.status}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface DashboardStats {
   totalStudents: number;
@@ -155,25 +234,7 @@ export default function AdminDashboard() {
               <Server className="h-4 w-4 text-neon-green" />
               <h2 className="font-display text-lg font-semibold tracking-wide">System Status</h2>
             </div>
-            <div className="futuristic-card p-5 neon-border animate-scan-line">
-              <div className="space-y-4">
-                {[
-                  { label: 'Database', status: 'Operational', color: 'text-neon-green' },
-                  { label: 'Authentication', status: 'Active', color: 'text-neon-green' },
-                  { label: 'File Storage', status: 'Ready', color: 'text-neon-green' },
-                  { label: 'Edge Functions', status: 'Running', color: 'text-neon-cyan' },
-                  { label: 'Realtime', status: 'Connected', color: 'text-neon-cyan' },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between">
-                    <span className="text-sm font-body text-muted-foreground">{item.label}</span>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full bg-neon-green animate-pulse-subtle`} />
-                      <span className={`text-xs font-body font-medium ${item.color}`}>{item.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SystemHealthCard />
           </div>
         </div>
       </div>

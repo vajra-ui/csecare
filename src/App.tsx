@@ -59,6 +59,10 @@ import COEDashboard from "@/pages/coe/COEDashboard";
 import COEUpload from "@/pages/coe/COEUpload";
 import COEPublished from "@/pages/coe/COEPublished";
 
+// Auth Pages
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+
 // Student extra
 import StudentActivities from "@/pages/student/StudentActivities";
 
@@ -104,6 +108,8 @@ function AppRoutes() {
       <Route path="/login/admin" element={<AdminLogin />} />
       <Route path="/login/faculty" element={<FacultyLogin />} />
       <Route path="/login/student" element={<StudentLogin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />

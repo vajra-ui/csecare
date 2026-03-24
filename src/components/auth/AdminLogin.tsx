@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Loader2, ShieldAlert } from 'lucide-react';
 import { LoginTransition } from './LoginTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { adminLogin } from '@/lib/auth';
+import { checkRateLimit, recordFailedAttempt, resetAttempts } from '@/lib/rateLimiter';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -34,7 +35,27 @@ export function AdminLogin() {
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const adminRole = localStorage.getItem('admin_view_role') || 'Admin';
+
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds <= 0) {
+      setRateLimited(false);
+      return;
+    }
+    const timer = setInterval(() => {
+      setLockoutSeconds(prev => {
+        if (prev <= 1) {
+          setRateLimited(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
@@ -45,9 +66,23 @@ export function AdminLogin() {
   });
 
   const onSubmit = async (data: AdminLoginForm) => {
+    // Check rate limit
+    const rateCheck = checkRateLimit();
+    if (!rateCheck.allowed) {
+      setRateLimited(true);
+      setLockoutSeconds(rateCheck.remainingSeconds || 300);
+      toast({
+        title: 'Too many attempts',
+        description: `Account locked. Try again in ${Math.ceil((rateCheck.remainingSeconds || 300) / 60)} minutes.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await adminLogin(data.email, data.password);
+      resetAttempts();
       await refreshUser();
       toast({
         title: 'Welcome, Administrator!',
@@ -55,11 +90,22 @@ export function AdminLogin() {
       });
       setShowTransition(true);
     } catch (error) {
-      toast({
-        title: 'Login Failed',
-        description: error instanceof Error ? error.message : 'Invalid credentials',
-        variant: 'destructive',
-      });
+      const result = recordFailedAttempt();
+      if (result.locked) {
+        setRateLimited(true);
+        setLockoutSeconds(result.remainingSeconds || 300);
+        toast({
+          title: 'Account Locked',
+          description: `Too many failed attempts. Try again in 5 minutes.`,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Login Failed',
+          description: error instanceof Error ? error.message : 'Invalid credentials',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -140,10 +186,16 @@ export function AdminLogin() {
                     </FormItem>
                   )}
                 />
+                {rateLimited && (
+                  <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                    <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                    <span>Too many attempts. Try again in {Math.ceil(lockoutSeconds / 60)} min {lockoutSeconds % 60}s</span>
+                  </div>
+                )}
                 <Button
                   type="submit"
                   className="w-full gradient-primary"
-                  disabled={loading}
+                  disabled={loading || rateLimited}
                 >
                   {loading ? (
                     <>
@@ -154,6 +206,11 @@ export function AdminLogin() {
                     'Sign In'
                   )}
                 </Button>
+                <div className="text-center">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </form>
             </Form>
           </CardContent>

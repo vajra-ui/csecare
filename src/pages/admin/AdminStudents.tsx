@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -95,6 +96,9 @@ export default function AdminStudents() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 50;
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -114,17 +118,22 @@ export default function AdminStudents() {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [currentPage]);
 
   const fetchStudents = async () => {
     try {
-      const { data, error } = await supabase
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error, count } = await supabase
         .from('students')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) throw error;
       setStudents(data || []);
+      setTotalCount(count || 0);
     } catch (error) {
       console.error('Error fetching students:', error);
       toast({ title: 'Error', description: 'Failed to fetch students', variant: 'destructive' });
@@ -469,6 +478,13 @@ export default function AdminStudents() {
                 </Table>
               </div>
             )}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalCount / PAGE_SIZE)}
+              onPageChange={setCurrentPage}
+              totalItems={totalCount}
+              pageSize={PAGE_SIZE}
+            />
           </CardContent>
         </Card>
       </div>
