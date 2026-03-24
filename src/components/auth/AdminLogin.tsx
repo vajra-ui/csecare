@@ -66,9 +66,23 @@ export function AdminLogin() {
   });
 
   const onSubmit = async (data: AdminLoginForm) => {
+    // Check rate limit
+    const rateCheck = checkRateLimit();
+    if (!rateCheck.allowed) {
+      setRateLimited(true);
+      setLockoutSeconds(rateCheck.remainingSeconds || 300);
+      toast({
+        title: 'Too many attempts',
+        description: `Account locked. Try again in ${Math.ceil((rateCheck.remainingSeconds || 300) / 60)} minutes.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await adminLogin(data.email, data.password);
+      resetAttempts();
       await refreshUser();
       toast({
         title: 'Welcome, Administrator!',
@@ -76,11 +90,22 @@ export function AdminLogin() {
       });
       setShowTransition(true);
     } catch (error) {
-      toast({
-        title: 'Login Failed',
-        description: error instanceof Error ? error.message : 'Invalid credentials',
-        variant: 'destructive',
-      });
+      const result = recordFailedAttempt();
+      if (result.locked) {
+        setRateLimited(true);
+        setLockoutSeconds(result.remainingSeconds || 300);
+        toast({
+          title: 'Account Locked',
+          description: `Too many failed attempts. Try again in 5 minutes.`,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Login Failed',
+          description: error instanceof Error ? error.message : 'Invalid credentials',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }

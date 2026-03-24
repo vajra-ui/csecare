@@ -108,6 +108,8 @@ function AppRoutes() {
       <Route path="/login/admin" element={<AdminLogin />} />
       <Route path="/login/faculty" element={<FacultyLogin />} />
       <Route path="/login/student" element={<StudentLogin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
