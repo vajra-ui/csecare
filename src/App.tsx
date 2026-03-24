@@ -59,6 +59,10 @@ import COEDashboard from "@/pages/coe/COEDashboard";
 import COEUpload from "@/pages/coe/COEUpload";
 import COEPublished from "@/pages/coe/COEPublished";
 
+// Auth Pages
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+
 // Student extra
 import StudentActivities from "@/pages/student/StudentActivities";
 
