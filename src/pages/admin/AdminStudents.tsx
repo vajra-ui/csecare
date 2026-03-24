@@ -95,6 +95,9 @@ export default function AdminStudents() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 50;
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
