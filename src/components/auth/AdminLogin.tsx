@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Loader2, ShieldAlert } from 'lucide-react';
 import { LoginTransition } from './LoginTransition';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
