@@ -35,7 +35,27 @@ export function AdminLogin() {
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const adminRole = localStorage.getItem('admin_view_role') || 'Admin';
+
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds <= 0) {
+      setRateLimited(false);
+      return;
+    }
+    const timer = setInterval(() => {
+      setLockoutSeconds(prev => {
+        if (prev <= 1) {
+          setRateLimited(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
