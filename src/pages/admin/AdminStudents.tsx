@@ -410,12 +410,16 @@ export default function AdminStudents() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">CSV Format</CardTitle>
-            <CardDescription>Required columns: name, roll_number, register_number, dob (YYYY-MM-DD), section, year</CardDescription>
-          </CardHeader>
-        </Card>
+        <BulkUpload
+          title="Bulk Upload Students"
+          description="Upload an Excel or CSV file with student data. Any column names are accepted — you'll map them in the next step."
+          fields={studentFields}
+          templateFileName="student_template"
+          templateSampleRow={{ name: 'John Doe', roll_number: '21CSE001', register_number: '921421104001', dob: '2003-05-15', section: 'CSE A', year: 'II' }}
+          duplicateKeys={['register_number', 'roll_number']}
+          onInsertRow={handleBulkInsertStudent}
+          existingKeys={existingStudentKeys}
+        />
 
         <Card>
           <CardHeader>
