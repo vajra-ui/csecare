@@ -5,12 +5,12 @@ import { z } from 'zod';
 import {
   GraduationCap,
   Plus,
-  Upload,
   Search,
   Loader2,
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { BulkUpload, FieldDef, UploadResult } from '@/components/admin/BulkUpload';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Button } from '@/components/ui/button';
