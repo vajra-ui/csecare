@@ -365,15 +365,6 @@ export default function AdminStudents() {
             <p className="text-muted-foreground text-sm md:text-base">Add, manage, and view student records</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <label>
-              <input type="file" accept=".csv" onChange={handleCsvUpload} className="hidden" disabled={csvUploading} />
-              <Button variant="outline" asChild disabled={csvUploading}>
-                <span className="cursor-pointer">
-                  {csvUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                  Import CSV
-                </span>
-              </Button>
-            </label>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary"><Plus className="mr-2 h-4 w-4" /> Add Student</Button>
