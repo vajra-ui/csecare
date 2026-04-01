@@ -248,37 +248,41 @@ export default function AdminStudents() {
     }
   };
 
-  const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setCsvUploading(true);
-    try {
-      const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const requiredHeaders = ['name', 'roll_number', 'register_number', 'dob', 'section', 'year'];
-      const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-      if (missingHeaders.length > 0) throw new Error(`Missing columns: ${missingHeaders.join(', ')}`);
+  // ── Bulk upload config ──
+  const studentFields: FieldDef[] = [
+    { key: 'name', label: 'Name', required: true, aliases: ['student name', 'full name', 'student'] },
+    { key: 'roll_number', label: 'Roll Number', required: true, aliases: ['roll no', 'rollno', 'roll'] },
+    { key: 'register_number', label: 'Register Number', required: true, aliases: ['reg no', 'regno', 'register', 'registration'] },
+    { key: 'dob', label: 'Date of Birth', required: true, aliases: ['date of birth', 'birthday', 'birth date', 'dateofbirth'],
+      validate: (v) => /^\d{4}-\d{2}-\d{2}$/.test(v) ? null : 'Must be YYYY-MM-DD format' },
+    { key: 'section', label: 'Section', required: true, aliases: ['sec', 'class', 'division'],
+      validate: (v) => ['CSE A','CSE B','CSE C','CSE D'].includes(v) ? null : 'Must be CSE A/B/C/D' },
+    { key: 'year', label: 'Year', required: true, aliases: ['yr', 'academic year', 'study year'],
+      validate: (v) => ['I','II','III','IV'].includes(v) ? null : 'Must be I/II/III/IV' },
+  ];
 
-      let successCount = 0, errorCount = 0;
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        const row: Record<string, string> = {};
-        headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
-        try {
-          const response = await supabase.functions.invoke('create-user', {
-            body: { type: 'student', data: { name: row.name, rollNumber: row.roll_number, registerNumber: row.register_number, dob: row.dob, section: row.section, year: row.year } },
-          });
-          if (response.error || response.data?.error) errorCount++; else successCount++;
-        } catch { errorCount++; }
-      }
-      toast({ title: 'CSV Import Complete', description: `${successCount} created, ${errorCount} failed.` });
-      fetchStudents();
-    } catch (error) {
-      toast({ title: 'CSV Import Failed', description: error instanceof Error ? error.message : 'Invalid CSV', variant: 'destructive' });
-    } finally {
-      setCsvUploading(false);
-      event.target.value = '';
+  const existingStudentKeys = new Set(students.map(s => `${s.register_number}|${s.roll_number}`));
+
+  const handleBulkInsertStudent = async (row: Record<string, string>): Promise<UploadResult> => {
+    try {
+      const response = await supabase.functions.invoke('create-user', {
+        body: {
+          type: 'student',
+          data: {
+            name: row.name,
+            rollNumber: row.roll_number,
+            registerNumber: row.register_number,
+            dob: row.dob,
+            section: row.section,
+            year: row.year,
+          },
+        },
+      });
+      if (response.error) return { success: false, error: response.error.message };
+      if (response.data?.error) return { success: false, error: response.data.error };
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
     }
   };
 
