@@ -443,6 +443,17 @@ export default function AdminFaculty() {
           </AlertDialogContent>
         </AlertDialog>
 
+        <BulkUpload
+          title="Bulk Upload Faculty"
+          description="Upload an Excel or CSV file with faculty data. Any column names are accepted — you'll map them in the next step."
+          fields={facultyFields}
+          templateFileName="faculty_template"
+          templateSampleRow={{ name: 'Dr. Jane Smith', dob: '1985-03-20', qualification: 'Ph.D', section: 'CSE A', is_tutor: 'false' }}
+          duplicateKeys={['name']}
+          onInsertRow={handleBulkInsertFaculty}
+          existingKeys={existingFacultyKeys}
+        />
+
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
