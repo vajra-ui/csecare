@@ -91,7 +91,7 @@ export default function AdminStudents() {
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [csvUploading, setCsvUploading] = useState(false);
+  const [_csvUploading, setCsvUploading] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
