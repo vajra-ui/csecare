@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { BulkUpload, FieldDef, UploadResult } from '@/components/admin/BulkUpload';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -266,6 +267,48 @@ export default function AdminFaculty() {
     f.faculty_id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // ── Bulk upload config ──
+  const facultyFields: FieldDef[] = [
+    { key: 'name', label: 'Name', required: true, aliases: ['faculty name', 'full name', 'teacher name'] },
+    { key: 'dob', label: 'Date of Birth', required: true, aliases: ['date of birth', 'birthday', 'birth date'],
+      validate: (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v) ? null : 'Must be YYYY-MM-DD format' },
+    { key: 'qualification', label: 'Qualification', required: false, aliases: ['qual', 'degree', 'education'] },
+    { key: 'section', label: 'Section', required: false, aliases: ['sec', 'class', 'assigned section'],
+      validate: (v: string) => !v || ['CSE A','CSE B','CSE C','CSE D'].includes(v) ? null : 'Must be CSE A/B/C/D or empty' },
+    { key: 'is_tutor', label: 'Is Tutor', required: false, aliases: ['tutor', 'is tutor', 'tutor status'],
+      validate: (v: string) => !v || ['true','false','yes','no','1','0'].includes(v.toLowerCase()) ? null : 'Must be true/false/yes/no' },
+  ];
+
+  const existingFacultyKeys = new Set(faculty.map(f => f.name));
+
+  const handleBulkInsertFaculty = async (row: Record<string, string>): Promise<UploadResult> => {
+    try {
+      const isTutorVal = row.is_tutor?.toLowerCase();
+      const isTutor = ['true', 'yes', '1'].includes(isTutorVal || '');
+      const section = row.section && ['CSE A','CSE B','CSE C','CSE D'].includes(row.section) ? row.section : null;
+
+      const response = await supabase.functions.invoke('create-user', {
+        body: {
+          type: 'faculty',
+          data: {
+            name: row.name,
+            dob: row.dob,
+            qualification: row.qualification || null,
+            yearsOfExperience: 0,
+            currentSubjects: [],
+            section: section,
+            isTutor: isTutor,
+          },
+        },
+      });
+      if (response.error) return { success: false, error: response.error.message };
+      if (response.data?.error) return { success: false, error: response.data.error };
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
+    }
+  };
+
   const FacultyFormFields = ({ formInstance, onSubmitFn, submitLabel, isSubmitting }: {
     formInstance: typeof form;
     onSubmitFn: (data: FacultyFormData) => void;
@@ -441,6 +484,17 @@ export default function AdminFaculty() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <BulkUpload
+          title="Bulk Upload Faculty"
+          description="Upload an Excel or CSV file with faculty data. Any column names are accepted — you'll map them in the next step."
+          fields={facultyFields}
+          templateFileName="faculty_template"
+          templateSampleRow={{ name: 'Dr. Jane Smith', dob: '1985-03-20', qualification: 'Ph.D', section: 'CSE A', is_tutor: 'false' }}
+          duplicateKeys={['name']}
+          onInsertRow={handleBulkInsertFaculty}
+          existingKeys={existingFacultyKeys}
+        />
 
         <Card>
           <CardHeader>
