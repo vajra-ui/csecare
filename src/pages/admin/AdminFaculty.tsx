@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { BulkUpload, FieldDef, UploadResult } from '@/components/admin/BulkUpload';
 import { AdminLayout } from '@/components/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
