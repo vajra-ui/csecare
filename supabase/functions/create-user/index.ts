@@ -313,12 +313,6 @@ Deno.serve(async (req) => {
         }
         facultyData = created;
       }
-        console.error("Faculty error:", facultyError);
-        return new Response(
-          JSON.stringify({ error: facultyError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
 
       // Upsert role
       await supabaseAdmin.from("user_roles").upsert({
