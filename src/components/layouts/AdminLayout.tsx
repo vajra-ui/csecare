@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Users, GraduationCap, Megaphone, Settings, LogOut, LayoutDashboard,
-  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck, AlertTriangle, UserCog,
+  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck, AlertTriangle, UserCog, Calendar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
