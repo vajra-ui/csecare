@@ -53,6 +53,7 @@ import AdminAlumni from "@/pages/admin/AdminAlumni";
 import AdminShowcase from "@/pages/admin/AdminShowcase";
 import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
+import AdminFacultyLeaves from "@/pages/admin/AdminFacultyLeaves";
 
 // COE Pages
 import COEDashboard from "@/pages/coe/COEDashboard";
