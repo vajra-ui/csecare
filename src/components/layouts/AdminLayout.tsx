@@ -25,6 +25,7 @@ const navItems = [
   { icon: Megaphone, label: 'Announcements', path: '/admin/announcements' },
   { icon: ClipboardList, label: 'Student OD', path: '/admin/od-requests' },
   { icon: CalendarOff, label: 'Faculty OD', path: '/admin/faculty-od' },
+  { icon: Calendar, label: 'Faculty Leaves', path: '/admin/faculty-leaves' },
   { icon: UserCog, label: 'Substitutes', path: '/admin/substitutes' },
   { icon: AlertTriangle, label: 'Absence Reports', path: '/admin/absence-reports' },
   { icon: FileSpreadsheet, label: 'Audit Logs', path: '/admin/audit-logs' },

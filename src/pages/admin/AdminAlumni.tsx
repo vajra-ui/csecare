@@ -227,7 +227,7 @@ export default function AdminAlumni() {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <a
-                                    href={a.linkedin}
+                                    href={a.linkedin.startsWith('http') ? a.linkedin : `https://${a.linkedin}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#0077B5]/10 text-[#0077B5] hover:bg-[#0077B5]/20 transition-colors"
