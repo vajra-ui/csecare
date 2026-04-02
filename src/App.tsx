@@ -53,6 +53,7 @@ import AdminAlumni from "@/pages/admin/AdminAlumni";
 import AdminShowcase from "@/pages/admin/AdminShowcase";
 import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
+import AdminFacultyLeaves from "@/pages/admin/AdminFacultyLeaves";
 
 // COE Pages
 import COEDashboard from "@/pages/coe/COEDashboard";
@@ -127,6 +128,7 @@ function AppRoutes() {
       <Route path="/admin/showcase" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShowcase /></ProtectedRoute>} />
       <Route path="/admin/substitutes" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSubstitutes /></ProtectedRoute>} />
       <Route path="/admin/absence-reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAbsenceReports /></ProtectedRoute>} />
+      <Route path="/admin/faculty-leaves" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminFacultyLeaves /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
       <Route path="/faculty" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyDashboard /></ProtectedRoute>} />

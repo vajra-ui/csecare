@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,7 @@ interface Alumni {
   linkedin: string | null;
   email: string | null;
   phone: string | null;
+  profile_image_url: string | null;
   created_at: string;
 }
 
@@ -173,6 +174,9 @@ export default function AdminAlumni() {
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
                         <Avatar className="h-12 w-12 shadow-md ring-2 ring-background">
+                          {a.profile_image_url && (
+                            <AvatarImage src={a.profile_image_url} alt={a.name} className="object-cover" />
+                          )}
                           <AvatarFallback className={`bg-gradient-to-br ${colorClass} text-white font-semibold text-sm`}>
                             {getInitials(a.name)}
                           </AvatarFallback>
@@ -223,7 +227,7 @@ export default function AdminAlumni() {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <a
-                                    href={a.linkedin}
+                                    href={a.linkedin.startsWith('http') ? a.linkedin : `https://${a.linkedin}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#0077B5]/10 text-[#0077B5] hover:bg-[#0077B5]/20 transition-colors"

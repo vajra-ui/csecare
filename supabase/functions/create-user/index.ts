@@ -255,29 +255,63 @@ Deno.serve(async (req) => {
         userId = authData.user!.id;
       }
 
-      // Create faculty record
-      const { data: facultyData, error: facultyError } = await supabaseAdmin
+      // Check if faculty record already exists for this user
+      const { data: existingFaculty } = await supabaseAdmin
         .from("faculty")
-        .insert({
-          user_id: userId,
-          faculty_id: facultyId,
-          name: data.name,
-          dob: data.dob,
-          qualification: data.qualification || null,
-          years_of_experience: data.yearsOfExperience || 0,
-          current_subjects: data.currentSubjects || [],
-          section: data.section || null,
-          is_tutor: data.isTutor || false,
-        })
-        .select()
-        .single();
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (facultyError) {
-        console.error("Faculty error:", facultyError);
-        return new Response(
-          JSON.stringify({ error: facultyError.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      let facultyData;
+      if (existingFaculty) {
+        // Update existing faculty
+        const { data: updated, error: updateErr } = await supabaseAdmin
+          .from("faculty")
+          .update({
+            name: data.name,
+            dob: data.dob,
+            qualification: data.qualification || null,
+            years_of_experience: data.yearsOfExperience || 0,
+            current_subjects: data.currentSubjects || [],
+            section: data.section || null,
+            is_tutor: data.isTutor || false,
+          })
+          .eq("id", existingFaculty.id)
+          .select()
+          .single();
+        if (updateErr) {
+          return new Response(
+            JSON.stringify({ error: updateErr.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        facultyData = updated;
+      } else {
+        // Create faculty record
+        const { data: created, error: facultyError } = await supabaseAdmin
+          .from("faculty")
+          .insert({
+            user_id: userId,
+            faculty_id: facultyId,
+            name: data.name,
+            dob: data.dob,
+            qualification: data.qualification || null,
+            years_of_experience: data.yearsOfExperience || 0,
+            current_subjects: data.currentSubjects || [],
+            section: data.section || null,
+            is_tutor: data.isTutor || false,
+          })
+          .select()
+          .single();
+
+        if (facultyError) {
+          console.error("Faculty error:", facultyError);
+          return new Response(
+            JSON.stringify({ error: facultyError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        facultyData = created;
       }
 
       // Upsert role
