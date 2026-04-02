@@ -23,6 +23,7 @@ interface Alumni {
   linkedin: string | null;
   email: string | null;
   phone: string | null;
+  profile_image_url: string | null;
   created_at: string;
 }
 
