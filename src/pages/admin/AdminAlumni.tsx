@@ -174,6 +174,9 @@ export default function AdminAlumni() {
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
                         <Avatar className="h-12 w-12 shadow-md ring-2 ring-background">
+                          {a.profile_image_url && (
+                            <AvatarImage src={a.profile_image_url} alt={a.name} className="object-cover" />
+                          )}
                           <AvatarFallback className={`bg-gradient-to-br ${colorClass} text-white font-semibold text-sm`}>
                             {getInitials(a.name)}
                           </AvatarFallback>
