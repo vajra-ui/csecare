@@ -38,7 +38,7 @@ export function StudentLogin() {
   const form = useForm<StudentLoginForm>({
     resolver: zodResolver(studentLoginSchema),
     defaultValues: {
-      rollNumber: '',
+      identifier: '',
       dob: '',
     },
   });
