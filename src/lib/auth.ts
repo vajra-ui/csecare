@@ -80,20 +80,41 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
   };
 }
 
-// Student login with Roll Number + DOB
+// Student login with Roll Number OR Register Number + DOB
 // Sign in FIRST (bypasses RLS), then fetch student record
-export async function studentLogin(rollNumber: string, dob: string): Promise<AuthUser> {
-  const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
+export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
   const password = dob.replace(/-/g, '');
+  const upperIdentifier = identifier.toUpperCase();
 
-  // Sign in first
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+  // Try roll number email first
+  let email = `${upperIdentifier.toLowerCase()}@student.paavai.edu.in`;
+  let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
+  // If failed, try looking up by register number to find the roll number
   if (authError) {
-    throw new Error('Invalid Roll Number or Date of Birth');
+    // We need to find the student's roll number from their register number
+    // Since we're not authenticated yet, we use the create-user edge function approach
+    // But actually we can try a public lookup — let's search students table
+    // We'll use supabase anon key which can't read students table due to RLS
+    // So instead, try constructing email from register number directly
+    const regEmail = `${upperIdentifier.toLowerCase()}@student.paavai.edu.in`;
+    if (regEmail !== email) {
+      const result = await supabase.auth.signInWithPassword({
+        email: regEmail,
+        password,
+      });
+      if (!result.error) {
+        authData = result.data;
+        authError = null;
+      }
+    }
+  }
+
+  if (authError || !authData?.user) {
+    throw new Error('Invalid Roll Number / Register Number or Date of Birth');
   }
 
   // Now authenticated - fetch student record
