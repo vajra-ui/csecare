@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
 const studentLoginSchema = z.object({
-  rollNumber: z.string().min(1, 'Roll Number is required'),
+  identifier: z.string().min(1, 'Roll Number or Register Number is required'),
   dob: z.string().min(1, 'Date of Birth is required'),
 });
 
@@ -38,7 +38,7 @@ export function StudentLogin() {
   const form = useForm<StudentLoginForm>({
     resolver: zodResolver(studentLoginSchema),
     defaultValues: {
-      rollNumber: '',
+      identifier: '',
       dob: '',
     },
   });
@@ -46,7 +46,7 @@ export function StudentLogin() {
   const onSubmit = async (data: StudentLoginForm) => {
     setLoading(true);
     try {
-      const user = await studentLogin(data.rollNumber, data.dob);
+      const user = await studentLogin(data.identifier, data.dob);
       await refreshUser();
       toast({
         title: `Welcome, ${user.name}!`,
@@ -88,7 +88,7 @@ export function StudentLogin() {
             <div>
               <CardTitle className="font-display text-2xl">Student Login</CardTitle>
               <CardDescription>
-                Enter your Roll Number and Date of Birth
+                Enter your Roll Number or Register Number and Date of Birth
               </CardDescription>
             </div>
           </CardHeader>
@@ -97,15 +97,15 @@ export function StudentLogin() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="rollNumber"
+                  name="identifier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Roll Number</FormLabel>
+                      <FormLabel>Roll Number / Register Number</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            placeholder="21CSE001"
+                            placeholder="21CSE001 or 611221104001"
                             className="pl-10 uppercase"
                             {...field}
                             onChange={(e) => field.onChange(e.target.value.toUpperCase())}

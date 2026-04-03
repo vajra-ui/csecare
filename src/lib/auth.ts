@@ -80,20 +80,31 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
   };
 }
 
-// Student login with Roll Number + DOB
-// Sign in FIRST (bypasses RLS), then fetch student record
-export async function studentLogin(rollNumber: string, dob: string): Promise<AuthUser> {
-  const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
+// Student login with Roll Number OR Register Number + DOB
+export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
   const password = dob.replace(/-/g, '');
+  const upperIdentifier = identifier.toUpperCase().trim();
 
-  // Sign in first
+  // Look up the roll number (works for both roll number and register number)
+  const { data: lookupData, error: lookupError } = await supabase.functions.invoke('student-lookup', {
+    body: { identifier: upperIdentifier },
+  });
+
+  if (lookupError || !lookupData?.roll_number) {
+    throw new Error('Student not found. Please check your Roll Number or Register Number.');
+  }
+
+  const rollNumber = lookupData.roll_number;
+  const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
+
+  // Sign in with the resolved roll number email
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (authError) {
-    throw new Error('Invalid Roll Number or Date of Birth');
+    throw new Error('Invalid credentials. Please check your Date of Birth.');
   }
 
   // Now authenticated - fetch student record
