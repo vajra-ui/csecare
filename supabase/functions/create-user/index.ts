@@ -216,16 +216,15 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Generate faculty ID
+      // Generate a unique faculty ID
       const { data: facultyIdData } = await supabaseAdmin.rpc("generate_faculty_id");
-      const facultyId = facultyIdData || `FAC${new Date().getFullYear().toString().slice(-2)}0001`;
+      const facultyId = facultyIdData || `FAC${new Date().getFullYear().toString().slice(-2)}${Date.now().toString().slice(-4)}`;
 
       // Create email from faculty ID
       const email = `${facultyId.toLowerCase()}@paavai.edu.in`;
       const password = data.dob.replace(/-/g, "");
 
-      // Create or find existing auth user
-      let userId: string;
+      // Always create a NEW auth user for each new faculty
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -233,106 +232,56 @@ Deno.serve(async (req) => {
       });
 
       if (authError) {
-        if (authError.message.includes("already been registered")) {
-          const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-          const existing = existingUsers?.users?.find(u => u.email === email);
-          if (!existing) {
-            return new Response(
-              JSON.stringify({ error: "User exists but could not be found" }),
-              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          await supabaseAdmin.auth.admin.updateUserById(existing.id, { password });
-          userId = existing.id;
-        } else {
-          console.error("Auth error:", authError);
-          return new Response(
-            JSON.stringify({ error: authError.message }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      } else {
-        userId = authData.user!.id;
+        // If email already registered, the faculty_id collided — this shouldn't happen
+        // with the fixed generate_faculty_id, but handle gracefully
+        console.error("Auth error:", authError);
+        return new Response(
+          JSON.stringify({ error: `Could not create account: ${authError.message}. The generated Faculty ID may already exist. Please try again.` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      // Check if faculty record already exists for this user
-      const { data: existingFaculty } = await supabaseAdmin
+      const userId = authData.user!.id;
+
+      // Always INSERT a new faculty record — never update
+      const { data: facultyData, error: facultyError } = await supabaseAdmin
         .from("faculty")
-        .select("id")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .insert({
+          user_id: userId,
+          faculty_id: facultyId,
+          name: data.name,
+          dob: data.dob,
+          qualification: data.qualification || null,
+          years_of_experience: data.yearsOfExperience || 0,
+          current_subjects: data.currentSubjects || [],
+          section: data.section || null,
+          is_tutor: data.isTutor || false,
+        })
+        .select()
+        .single();
 
-      let facultyData;
-      if (existingFaculty) {
-        // Update existing faculty
-        const { data: updated, error: updateErr } = await supabaseAdmin
-          .from("faculty")
-          .update({
-            name: data.name,
-            dob: data.dob,
-            qualification: data.qualification || null,
-            years_of_experience: data.yearsOfExperience || 0,
-            current_subjects: data.currentSubjects || [],
-            section: data.section || null,
-            is_tutor: data.isTutor || false,
-          })
-          .eq("id", existingFaculty.id)
-          .select()
-          .single();
-        if (updateErr) {
-          return new Response(
-            JSON.stringify({ error: updateErr.message }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        facultyData = updated;
-      } else {
-        // Create faculty record
-        const { data: created, error: facultyError } = await supabaseAdmin
-          .from("faculty")
-          .insert({
-            user_id: userId,
-            faculty_id: facultyId,
-            name: data.name,
-            dob: data.dob,
-            qualification: data.qualification || null,
-            years_of_experience: data.yearsOfExperience || 0,
-            current_subjects: data.currentSubjects || [],
-            section: data.section || null,
-            is_tutor: data.isTutor || false,
-          })
-          .select()
-          .single();
-
-        if (facultyError) {
-          console.error("Faculty error:", facultyError);
-          return new Response(
-            JSON.stringify({ error: facultyError.message }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        facultyData = created;
+      if (facultyError) {
+        // Clean up auth user if faculty insert fails
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+        console.error("Faculty error:", facultyError);
+        return new Response(
+          JSON.stringify({ error: facultyError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      // Upsert role
-      await supabaseAdmin.from("user_roles").upsert({
+      // Set role
+      await supabaseAdmin.from("user_roles").insert({
         user_id: userId,
         role: data.isTutor ? "TUTOR" : "FACULTY",
-      }, { onConflict: "user_id,role" });
+      });
 
-      // Upsert profile
-      const { data: existingProfile } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("user_id", userId)
-        .maybeSingle();
-      if (!existingProfile) {
-        await supabaseAdmin.from("profiles").insert({
-          user_id: userId,
-          name: data.name,
-          email,
-        });
-      }
+      // Create profile
+      await supabaseAdmin.from("profiles").insert({
+        user_id: userId,
+        name: data.name,
+        email,
+      });
 
       // Audit log
       await supabaseAdmin.from("audit_logs").insert({
