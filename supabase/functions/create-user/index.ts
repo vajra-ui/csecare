@@ -216,27 +216,41 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Generate a unique faculty ID
-      const { data: facultyIdData } = await supabaseAdmin.rpc("generate_faculty_id");
-      const facultyId = facultyIdData || `FAC${new Date().getFullYear().toString().slice(-2)}${Date.now().toString().slice(-4)}`;
-
-      // Create email from faculty ID
-      const email = `${facultyId.toLowerCase()}@paavai.edu.in`;
+      // Generate a unique faculty ID with retry logic for collisions
       const password = data.dob.replace(/-/g, "");
+      let facultyId = "";
+      let email = "";
+      let authData: any = null;
+      let lastAuthError: any = null;
 
-      // Always create a NEW auth user for each new faculty
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { data: facultyIdData } = await supabaseAdmin.rpc("generate_faculty_id");
+        const suffix = attempt > 0 ? Date.now().toString().slice(-4) : "";
+        facultyId = (facultyIdData || `FAC${new Date().getFullYear().toString().slice(-2)}${Date.now().toString().slice(-4)}`) + suffix;
+        email = `${facultyId.toLowerCase()}@paavai.edu.in`;
 
-      if (authError) {
-        // If email already registered, the faculty_id collided — this shouldn't happen
-        // with the fixed generate_faculty_id, but handle gracefully
-        console.error("Auth error:", authError);
+        const { data: ad, error: ae } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+
+        if (!ae) {
+          authData = ad;
+          lastAuthError = null;
+          break;
+        }
+
+        console.error(`Auth attempt ${attempt + 1} error:`, ae.message);
+        lastAuthError = ae;
+
+        // Only retry on email_exists collision
+        if (ae.code !== "email_exists") break;
+      }
+
+      if (lastAuthError || !authData) {
         return new Response(
-          JSON.stringify({ error: `Could not create account: ${authError.message}. The generated Faculty ID may already exist. Please try again.` }),
+          JSON.stringify({ error: `Could not create account: ${lastAuthError?.message || "Unknown error"}. Please try again.` }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
