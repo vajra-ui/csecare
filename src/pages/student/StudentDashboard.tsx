@@ -219,6 +219,7 @@ export default function StudentDashboard() {
 
           <div className="space-y-6">
             <AnnouncementPanel />
+            <MyFacultiesCard studentSection={studentData?.section || null} />
           </div>
         </div>
       </div>
