@@ -35,9 +35,9 @@ export function MyFacultiesCard({ studentSection }: MyFacultiesCardProps) {
         .select('faculty_id')
         .eq('section', studentSection as any);
 
-      const facultyIdsFromTimetable = [
-        ...new Set((timetableData || []).map(t => t.faculty_id)),
-      ];
+      const facultyIdsFromTimetable = Array.from(
+        new Set((timetableData || []).map(t => t.faculty_id))
+      );
 
       // Get the section tutor
       const { data: tutorData } = await supabase
