@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { StudentLayout } from '@/components/layouts/StudentLayout';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
+import { MyFacultiesCard } from '@/components/student/MyFacultiesCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { isBirthday } from '@/lib/auth';
@@ -218,6 +219,7 @@ export default function StudentDashboard() {
 
           <div className="space-y-6">
             <AnnouncementPanel />
+            <MyFacultiesCard studentSection={studentData?.section || null} />
           </div>
         </div>
       </div>

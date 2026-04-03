@@ -140,7 +140,37 @@ export default function AdminFaculty() {
     }
   };
 
+  const validateTutorAssignment = (data: FacultyFormData, excludeId?: string): string | null => {
+    if (!data.isTutor) return null;
+    const section = data.section === 'none' ? null : data.section;
+    if (!section) return 'A Tutor must be assigned to a section.';
+
+    // Check if this faculty is already a tutor for another section
+    const existingTutor = faculty.find(
+      f => f.id !== excludeId && f.is_tutor && f.name === data.name
+    );
+    if (existingTutor && existingTutor.section !== section) {
+      return `Faculty "${data.name}" is already assigned as Tutor for ${existingTutor.section}.`;
+    }
+
+    // Check if section already has a tutor
+    const sectionTutor = faculty.find(
+      f => f.id !== excludeId && f.is_tutor && f.section === section
+    );
+    if (sectionTutor) {
+      return `Section ${section} already has a Tutor: ${sectionTutor.name}.`;
+    }
+
+    return null;
+  };
+
   const onSubmit = async (data: FacultyFormData) => {
+    const tutorError = validateTutorAssignment(data);
+    if (tutorError) {
+      toast({ title: 'Tutor Assignment Error', description: tutorError, variant: 'destructive' });
+      return;
+    }
+
     setCreating(true);
     try {
       const subjects = data.currentSubjects
@@ -200,6 +230,13 @@ export default function AdminFaculty() {
 
   const onEditSubmit = async (data: FacultyFormData) => {
     if (!editingFaculty) return;
+
+    const tutorError = validateTutorAssignment(data, editingFaculty.id);
+    if (tutorError) {
+      toast({ title: 'Tutor Assignment Error', description: tutorError, variant: 'destructive' });
+      return;
+    }
+
     setCreating(true);
     try {
       const subjects = data.currentSubjects
