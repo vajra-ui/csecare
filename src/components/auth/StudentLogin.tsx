@@ -46,7 +46,7 @@ export function StudentLogin() {
   const onSubmit = async (data: StudentLoginForm) => {
     setLoading(true);
     try {
-      const user = await studentLogin(data.rollNumber, data.dob);
+      const user = await studentLogin(data.identifier, data.dob);
       await refreshUser();
       toast({
         title: `Welcome, ${user.name}!`,
