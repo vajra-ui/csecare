@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
 const studentLoginSchema = z.object({
-  rollNumber: z.string().min(1, 'Roll Number is required'),
+  identifier: z.string().min(1, 'Roll Number or Register Number is required'),
   dob: z.string().min(1, 'Date of Birth is required'),
 });
 
