@@ -88,7 +88,7 @@ export function StudentLogin() {
             <div>
               <CardTitle className="font-display text-2xl">Student Login</CardTitle>
               <CardDescription>
-                Enter your Roll Number and Date of Birth
+                Enter your Roll Number or Register Number and Date of Birth
               </CardDescription>
             </div>
           </CardHeader>
