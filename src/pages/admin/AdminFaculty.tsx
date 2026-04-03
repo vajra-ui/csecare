@@ -230,6 +230,13 @@ export default function AdminFaculty() {
 
   const onEditSubmit = async (data: FacultyFormData) => {
     if (!editingFaculty) return;
+
+    const tutorError = validateTutorAssignment(data, editingFaculty.id);
+    if (tutorError) {
+      toast({ title: 'Tutor Assignment Error', description: tutorError, variant: 'destructive' });
+      return;
+    }
+
     setCreating(true);
     try {
       const subjects = data.currentSubjects
