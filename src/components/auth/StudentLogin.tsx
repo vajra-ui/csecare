@@ -97,15 +97,15 @@ export function StudentLogin() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="rollNumber"
+                  name="identifier"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Roll Number</FormLabel>
+                      <FormLabel>Roll Number / Register Number</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            placeholder="21CSE001"
+                            placeholder="21CSE001 or 611221104001"
                             className="pl-10 uppercase"
                             {...field}
                             onChange={(e) => field.onChange(e.target.value.toUpperCase())}
