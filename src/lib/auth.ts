@@ -81,40 +81,30 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
 }
 
 // Student login with Roll Number OR Register Number + DOB
-// Sign in FIRST (bypasses RLS), then fetch student record
 export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
   const password = dob.replace(/-/g, '');
-  const upperIdentifier = identifier.toUpperCase();
+  const upperIdentifier = identifier.toUpperCase().trim();
 
-  // Try roll number email first
-  let email = `${upperIdentifier.toLowerCase()}@student.paavai.edu.in`;
-  let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+  // Look up the roll number (works for both roll number and register number)
+  const { data: lookupData, error: lookupError } = await supabase.functions.invoke('student-lookup', {
+    body: { identifier: upperIdentifier },
+  });
+
+  if (lookupError || !lookupData?.roll_number) {
+    throw new Error('Student not found. Please check your Roll Number or Register Number.');
+  }
+
+  const rollNumber = lookupData.roll_number;
+  const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
+
+  // Sign in with the resolved roll number email
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  // If failed, try looking up by register number to find the roll number
   if (authError) {
-    // We need to find the student's roll number from their register number
-    // Since we're not authenticated yet, we use the create-user edge function approach
-    // But actually we can try a public lookup — let's search students table
-    // We'll use supabase anon key which can't read students table due to RLS
-    // So instead, try constructing email from register number directly
-    const regEmail = `${upperIdentifier.toLowerCase()}@student.paavai.edu.in`;
-    if (regEmail !== email) {
-      const result = await supabase.auth.signInWithPassword({
-        email: regEmail,
-        password,
-      });
-      if (!result.error) {
-        authData = result.data;
-        authError = null;
-      }
-    }
-  }
-
-  if (authError || !authData?.user) {
-    throw new Error('Invalid Roll Number / Register Number or Date of Birth');
+    throw new Error('Invalid credentials. Please check your Date of Birth.');
   }
 
   // Now authenticated - fetch student record
