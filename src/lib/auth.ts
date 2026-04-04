@@ -82,7 +82,8 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
 
 // Student login with Roll Number OR Register Number + DOB
 export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
-  const password = dob.replace(/-/g, '');
+  const cleanDob = dob.trim();
+  const password = cleanDob.replace(/-/g, '');
   const upperIdentifier = identifier.toUpperCase().trim();
 
   // Look up the roll number (works for both roll number and register number)
@@ -90,12 +91,16 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     body: { identifier: upperIdentifier },
   });
 
-  if (lookupError || !lookupData?.roll_number) {
+  console.log('Student lookup result:', { lookupData, lookupError, upperIdentifier });
+
+  // supabase.functions.invoke may return error object in data on non-2xx
+  const rollNumber = lookupData?.roll_number;
+  if (lookupError || !rollNumber) {
     throw new Error('Student not found. Please check your Roll Number or Register Number.');
   }
 
-  const rollNumber = lookupData.roll_number;
   const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
+  console.log('Attempting login with:', { email, passwordLength: password.length });
 
   // Sign in with the resolved roll number email
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -104,6 +109,7 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
   });
 
   if (authError) {
+    console.error('Auth error:', authError);
     throw new Error('Invalid credentials. Please check your Date of Birth.');
   }
 
