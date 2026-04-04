@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { ShieldCheck, GraduationCap, Users, Crown, BookOpen, Building2, Sparkles, ArrowRight, Cpu } from 'lucide-react';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
@@ -8,6 +10,15 @@ import { AchievementGallery } from '@/components/AchievementGallery';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (user.role === 'ADMIN') navigate('/admin', { replace: true });
+      else if (user.role === 'FACULTY' || user.role === 'TUTOR') navigate('/faculty', { replace: true });
+      else if (user.role === 'STUDENT') navigate('/student', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleAdminLogin = (role: string) => {
     localStorage.setItem('admin_view_role', role);
