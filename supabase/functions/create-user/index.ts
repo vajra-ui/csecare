@@ -81,10 +81,16 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Create email from roll number
-      const email = `${data.rollNumber.toLowerCase()}@student.paavai.edu.in`;
+      // Normalize inputs
+      const cleanRollNumber = data.rollNumber.trim().toUpperCase();
+      const cleanRegisterNumber = data.registerNumber.trim().toUpperCase();
+      const cleanDob = data.dob.trim();
+      
+      // Create email from roll number (lowercase)
+      const email = `${cleanRollNumber.toLowerCase()}@student.paavai.edu.in`;
       // Password is DOB without dashes
-      const password = data.dob.replace(/-/g, "");
+      const password = cleanDob.replace(/-/g, "");
+      console.log("Creating student auth:", { email, passwordLength: password.length });
 
       // Create or find existing auth user
       let userId: string;

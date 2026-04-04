@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
     );
 
     const upper = identifier.trim().toUpperCase();
+    console.log("Looking up student with identifier:", upper);
 
     // Try finding by roll number first
     const { data: byRoll } = await supabaseAdmin
