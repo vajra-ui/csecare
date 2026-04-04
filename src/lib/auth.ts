@@ -12,17 +12,11 @@ export interface AuthUser {
   isTutor?: boolean;
 }
 
-// Admin login with email/password
 export async function adminLogin(email: string, password: string): Promise<AuthUser> {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   if (!data.user) throw new Error('Login failed');
 
-  // Check if user has ADMIN role
   const { data: roleData, error: roleError } = await supabase
     .from('user_roles')
     .select('role')
@@ -34,31 +28,16 @@ export async function adminLogin(email: string, password: string): Promise<AuthU
     throw new Error('Unauthorized: Admin access required');
   }
 
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    role: 'ADMIN',
-    name: 'Administrator',
-  };
+  return { id: data.user.id, email: data.user.email, role: 'ADMIN', name: 'Administrator' };
 }
 
-// Faculty login with Faculty ID + DOB
-// Sign in FIRST (bypasses RLS), then fetch faculty record
 export async function facultyLogin(facultyId: string, dob: string): Promise<AuthUser> {
   const email = `${facultyId.toLowerCase()}@paavai.edu.in`;
   const password = dob.replace(/-/g, '');
 
-  // Sign in first - this works regardless of RLS
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+  if (authError) throw new Error('Invalid Faculty ID or Date of Birth');
 
-  if (authError) {
-    throw new Error('Invalid Faculty ID or Date of Birth');
-  }
-
-  // Now authenticated - fetch faculty record
   const { data: faculty, error: facultyError } = await supabase
     .from('faculty')
     .select('*')
@@ -70,50 +49,42 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
     throw new Error('Faculty record not found. Please contact admin.');
   }
 
+  const role: UserRole = faculty.is_tutor ? 'TUTOR' : 'FACULTY';
+
+  // ✅ FIX 1: Upsert role into user_roles so getCurrentUser() can find it
+  await supabase
+    .from('user_roles')
+    .upsert({ user_id: authData.user.id, role }, { onConflict: 'user_id' });
+
   return {
     id: faculty.id,
     email: authData.user.email,
-    role: faculty.is_tutor ? 'TUTOR' : 'FACULTY',
+    role,
     name: faculty.name,
     facultyId: faculty.faculty_id,
     isTutor: faculty.is_tutor,
   };
 }
 
-// Student login with Roll Number OR Register Number + DOB
 export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
   const cleanDob = dob.trim();
   const password = cleanDob.replace(/-/g, '');
   const upperIdentifier = identifier.toUpperCase().trim();
 
-  // Look up the roll number (works for both roll number and register number)
   const { data: lookupData, error: lookupError } = await supabase.functions.invoke('student-lookup', {
     body: { identifier: upperIdentifier },
   });
 
-  console.log('Student lookup result:', { lookupData, lookupError, upperIdentifier });
-
-  // supabase.functions.invoke may return error object in data on non-2xx
   const rollNumber = lookupData?.roll_number;
   if (lookupError || !rollNumber) {
     throw new Error('Student not found. Please check your Roll Number or Register Number.');
   }
 
   const email = `${rollNumber.toLowerCase()}@student.paavai.edu.in`;
-  console.log('Attempting login with:', { email, passwordLength: password.length });
 
-  // Sign in with the resolved roll number email
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+  if (authError) throw new Error('Invalid credentials. Please check your Date of Birth.');
 
-  if (authError) {
-    console.error('Auth error:', authError);
-    throw new Error('Invalid credentials. Please check your Date of Birth.');
-  }
-
-  // Now authenticated - fetch student record
   const { data: student, error: studentError } = await supabase
     .from('students')
     .select('*')
@@ -125,6 +96,11 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     throw new Error('Student record not found. Please contact admin.');
   }
 
+  // ✅ FIX 1 (same): Upsert role for students too
+  await supabase
+    .from('user_roles')
+    .upsert({ user_id: authData.user.id, role: 'STUDENT' }, { onConflict: 'user_id' });
+
   return {
     id: student.id,
     email: authData.user.email,
@@ -134,38 +110,64 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
   };
 }
 
-// Get current user info
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  
   if (!user) return null;
 
-  // Check role
   const { data: roleData } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!roleData) return null;
-
-  const role = roleData.role as UserRole;
-
-  if (role === 'ADMIN') {
-    return {
-      id: user.id,
-      email: user.email,
-      role: 'ADMIN',
-      name: 'Administrator',
-    };
-  }
-
-  if (role === 'FACULTY' || role === 'TUTOR') {
+  // ✅ FIX 2: If no role row yet (race condition right after login),
+  // fall back to checking faculty/student tables directly
+  if (!roleData) {
     const { data: faculty } = await supabase
       .from('faculty')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
+
+    if (faculty) {
+      return {
+        id: faculty.id,
+        email: user.email,
+        role: faculty.is_tutor ? 'TUTOR' : 'FACULTY',
+        name: faculty.name,
+        facultyId: faculty.faculty_id,
+        isTutor: faculty.is_tutor,
+      };
+    }
+
+    const { data: student } = await supabase
+      .from('students')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (student) {
+      return {
+        id: student.id,
+        email: user.email,
+        role: 'STUDENT',
+        name: student.name,
+        studentId: student.id,
+      };
+    }
+
+    return null;
+  }
+
+  const role = roleData.role as UserRole;
+
+  if (role === 'ADMIN') {
+    return { id: user.id, email: user.email, role: 'ADMIN', name: 'Administrator' };
+  }
+
+  if (role === 'FACULTY' || role === 'TUTOR') {
+    const { data: faculty } = await supabase
+      .from('faculty').select('*').eq('user_id', user.id).single();
 
     if (faculty) {
       return {
@@ -181,10 +183,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
   if (role === 'STUDENT') {
     const { data: student } = await supabase
-      .from('students')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+      .from('students').select('*').eq('user_id', user.id).single();
 
     if (student) {
       return {
@@ -200,12 +199,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   return null;
 }
 
-// Logout
 export async function logout(): Promise<void> {
   await supabase.auth.signOut();
 }
 
-// Check if today is user's birthday
 export function isBirthday(dob: string): boolean {
   const today = new Date();
   const birthDate = new Date(dob);
