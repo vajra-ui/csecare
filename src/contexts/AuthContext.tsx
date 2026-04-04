@@ -29,17 +29,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
-        
         if (session?.user) {
-          // Defer fetching user data to avoid blocking
-          setTimeout(async () => {
-            await refreshUser();
-            setLoading(false);
-          }, 0);
+          // ✅ FIX: No setTimeout — await directly so role is set before anything navigates
+          await refreshUser();
+          setLoading(false);
         } else {
           setUser(null);
           setLoading(false);
@@ -47,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
@@ -57,9 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const logout = async () => {
