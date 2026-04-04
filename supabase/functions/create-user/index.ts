@@ -138,9 +138,9 @@ Deno.serve(async (req) => {
           .from("students")
           .update({
             name: data.name,
-            roll_number: data.rollNumber.toUpperCase(),
-            register_number: data.registerNumber.toUpperCase(),
-            dob: data.dob,
+            roll_number: cleanRollNumber,
+            register_number: cleanRegisterNumber,
+            dob: cleanDob,
             section: data.section || "CSE A",
             year: data.year || "I",
           })
