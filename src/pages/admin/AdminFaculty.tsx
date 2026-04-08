@@ -222,7 +222,7 @@ export default function AdminFaculty() {
       qualification: f.qualification || '',
       yearsOfExperience: f.years_of_experience || 0,
       currentSubjects: f.current_subjects?.join(', ') || '',
-      section: (f.section as FacultyFormData['section']) || 'none',
+      sections: f.sections || (f.section ? [f.section] : []),
       isTutor: f.is_tutor || false,
     });
     setIsEditDialogOpen(true);
@@ -251,7 +251,8 @@ export default function AdminFaculty() {
           qualification: data.qualification || null,
           years_of_experience: data.yearsOfExperience,
           current_subjects: subjects,
-          section: data.section === 'none' ? null : (data.section as any),
+          sections: data.sections,
+          section: data.isTutor && data.sections.length === 1 ? (data.sections[0] as any) : (data.sections[0] as any || null),
           is_tutor: data.isTutor,
         })
         .eq('id', editingFaculty.id);
@@ -415,22 +416,29 @@ export default function AdminFaculty() {
         />
         <FormField
           control={formInstance.control}
-          name="section"
+          name="sections"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Assigned Section</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger><SelectValue placeholder="Select section" /></SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No Section</SelectItem>
-                  <SelectItem value="CSE A">CSE A</SelectItem>
-                  <SelectItem value="CSE B">CSE B</SelectItem>
-                  <SelectItem value="CSE C">CSE C</SelectItem>
-                  <SelectItem value="CSE D">CSE D</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Assigned Sections</FormLabel>
+              <FormDescription>Select one or more sections this faculty teaches in</FormDescription>
+              <div className="grid grid-cols-2 gap-2">
+                {SECTIONS.map((sec) => (
+                  <label key={sec} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent/50 transition-colors">
+                    <Checkbox
+                      checked={field.value?.includes(sec)}
+                      onCheckedChange={(checked) => {
+                        const current = field.value || [];
+                        if (checked) {
+                          field.onChange([...current, sec]);
+                        } else {
+                          field.onChange(current.filter((s: string) => s !== sec));
+                        }
+                      }}
+                    />
+                    <span className="text-sm font-medium">{sec}</span>
+                  </label>
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}
