@@ -587,7 +587,11 @@ export default function AdminFaculty() {
                         <TableCell className="hidden md:table-cell">{f.qualification || '-'}</TableCell>
                         <TableCell className="hidden md:table-cell">{f.years_of_experience} yrs</TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          {f.section ? <Badge variant="outline">{f.section}</Badge> : '-'}
+                          {(f.sections && f.sections.length > 0) ? (
+                            <div className="flex flex-wrap gap-1">
+                              {f.sections.map(s => <Badge key={s} variant="outline">{s}</Badge>)}
+                            </div>
+                          ) : f.section ? <Badge variant="outline">{f.section}</Badge> : '-'}
                         </TableCell>
                         <TableCell>
                           {f.is_tutor ? (
