@@ -113,7 +113,7 @@ export default function AdminFaculty() {
       qualification: '',
       yearsOfExperience: 0,
       currentSubjects: '',
-      section: 'none',
+      sections: [],
       isTutor: false,
     },
   });
@@ -145,23 +145,19 @@ export default function AdminFaculty() {
 
   const validateTutorAssignment = (data: FacultyFormData, excludeId?: string): string | null => {
     if (!data.isTutor) return null;
-    const section = data.section === 'none' ? null : data.section;
-    if (!section) return 'A Tutor must be assigned to a section.';
+    if (data.sections.length === 0) return 'A Tutor must be assigned to at least one section.';
 
-    // Check if this faculty is already a tutor for another section
-    const existingTutor = faculty.find(
-      f => f.id !== excludeId && f.is_tutor && f.name === data.name
-    );
-    if (existingTutor && existingTutor.section !== section) {
-      return `Faculty "${data.name}" is already assigned as Tutor for ${existingTutor.section}.`;
-    }
+    // For tutor, only allow ONE section (tutor is 1:1 with section)
+    if (data.sections.length > 1) return 'A Tutor can only be assigned to one section.';
+
+    const tutorSection = data.sections[0];
 
     // Check if section already has a tutor
     const sectionTutor = faculty.find(
-      f => f.id !== excludeId && f.is_tutor && f.section === section
+      f => f.id !== excludeId && f.is_tutor && (f.sections?.includes(tutorSection) || f.section === tutorSection)
     );
     if (sectionTutor) {
-      return `Section ${section} already has a Tutor: ${sectionTutor.name}.`;
+      return `Section ${tutorSection} already has a Tutor: ${sectionTutor.name}.`;
     }
 
     return null;
@@ -189,7 +185,8 @@ export default function AdminFaculty() {
             qualification: data.qualification || null,
             yearsOfExperience: data.yearsOfExperience,
             currentSubjects: subjects,
-            section: data.section === 'none' ? null : data.section,
+            sections: data.sections,
+            section: data.isTutor && data.sections.length === 1 ? data.sections[0] : (data.sections[0] || null),
             isTutor: data.isTutor,
           },
         },
