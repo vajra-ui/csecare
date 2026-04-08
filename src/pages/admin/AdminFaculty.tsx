@@ -64,13 +64,15 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+const SECTIONS = ['CSE A', 'CSE B', 'CSE C', 'CSE D'] as const;
+
 const facultySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   dob: z.string().min(1, 'Date of birth is required'),
   qualification: z.string().optional(),
   yearsOfExperience: z.coerce.number().min(0).default(0),
   currentSubjects: z.string().optional(),
-  section: z.enum(['CSE A', 'CSE B', 'CSE C', 'CSE D', 'none']).default('none'),
+  sections: z.array(z.string()).default([]),
   isTutor: z.boolean().default(false),
 });
 
@@ -85,6 +87,7 @@ interface Faculty {
   years_of_experience: number;
   current_subjects: string[] | null;
   section: string | null;
+  sections: string[] | null;
   is_tutor: boolean;
   user_id: string | null;
   created_at: string;
