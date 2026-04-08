@@ -38,14 +38,21 @@ export default function FacultyMarks() {
   }, [user]);
 
   const fetchFacultyInfo = async () => {
-    const { data: faculty } = await supabase.from('faculty').select('id, current_subjects, section').eq('faculty_id', user?.facultyId).single();
+    const { data: faculty } = await supabase.from('faculty').select('id, current_subjects, section, sections').eq('faculty_id', user?.facultyId).single();
     if (!faculty) return;
     setFacultyDbId(faculty.id);
     setSubjects(faculty.current_subjects || []);
-    // Get sections from timetable
-    const { data: tt } = await supabase.from('timetable').select('section').eq('faculty_id', faculty.id);
-    const uniqueSections = [...new Set((tt || []).map((t: any) => t.section))];
-    setSections(uniqueSections as string[]);
+    // Use sections array first, fall back to timetable
+    const facultySections = (faculty.sections as string[]) || [];
+    if (facultySections.length > 0) {
+      setSections(facultySections);
+    } else if (faculty.section) {
+      setSections([faculty.section]);
+    } else {
+      const { data: tt } = await supabase.from('timetable').select('section').eq('faculty_id', faculty.id);
+      const uniqueSections = [...new Set((tt || []).map((t: any) => t.section))];
+      setSections(uniqueSections as string[]);
+    }
   };
 
   const fetchStudents = async () => {
