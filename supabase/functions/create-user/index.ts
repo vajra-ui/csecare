@@ -14,6 +14,7 @@ interface CreateUserRequest {
     rollNumber?: string;
     registerNumber?: string;
     section?: string;
+    sections?: string[];
     year?: string;
     qualification?: string;
     yearsOfExperience?: number;
@@ -264,6 +265,7 @@ Deno.serve(async (req) => {
       const userId = authData.user!.id;
 
       // Always INSERT a new faculty record — never update
+      const sections = data.sections || (data.section ? [data.section] : []);
       const { data: facultyData, error: facultyError } = await supabaseAdmin
         .from("faculty")
         .insert({
@@ -274,7 +276,8 @@ Deno.serve(async (req) => {
           qualification: data.qualification || null,
           years_of_experience: data.yearsOfExperience || 0,
           current_subjects: data.currentSubjects || [],
-          section: data.section || null,
+          section: data.isTutor && sections.length === 1 ? sections[0] : (sections[0] || null),
+          sections: sections,
           is_tutor: data.isTutor || false,
         })
         .select()

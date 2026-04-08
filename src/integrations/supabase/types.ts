@@ -475,6 +475,7 @@ export type Database = {
           name: string
           qualification: string | null
           section: Database["public"]["Enums"]["section_type"] | null
+          sections: string[] | null
           updated_at: string
           user_id: string | null
           years_of_experience: number | null
@@ -489,6 +490,7 @@ export type Database = {
           name: string
           qualification?: string | null
           section?: Database["public"]["Enums"]["section_type"] | null
+          sections?: string[] | null
           updated_at?: string
           user_id?: string | null
           years_of_experience?: number | null
@@ -503,6 +505,7 @@ export type Database = {
           name?: string
           qualification?: string | null
           section?: Database["public"]["Enums"]["section_type"] | null
+          sections?: string[] | null
           updated_at?: string
           user_id?: string | null
           years_of_experience?: number | null

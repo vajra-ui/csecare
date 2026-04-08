@@ -64,13 +64,15 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+const SECTIONS = ['CSE A', 'CSE B', 'CSE C', 'CSE D'] as const;
+
 const facultySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   dob: z.string().min(1, 'Date of birth is required'),
   qualification: z.string().optional(),
   yearsOfExperience: z.coerce.number().min(0).default(0),
   currentSubjects: z.string().optional(),
-  section: z.enum(['CSE A', 'CSE B', 'CSE C', 'CSE D', 'none']).default('none'),
+  sections: z.array(z.string()).default([]),
   isTutor: z.boolean().default(false),
 });
 
@@ -85,6 +87,7 @@ interface Faculty {
   years_of_experience: number;
   current_subjects: string[] | null;
   section: string | null;
+  sections: string[] | null;
   is_tutor: boolean;
   user_id: string | null;
   created_at: string;
@@ -110,7 +113,7 @@ export default function AdminFaculty() {
       qualification: '',
       yearsOfExperience: 0,
       currentSubjects: '',
-      section: 'none',
+      sections: [],
       isTutor: false,
     },
   });
@@ -142,23 +145,19 @@ export default function AdminFaculty() {
 
   const validateTutorAssignment = (data: FacultyFormData, excludeId?: string): string | null => {
     if (!data.isTutor) return null;
-    const section = data.section === 'none' ? null : data.section;
-    if (!section) return 'A Tutor must be assigned to a section.';
+    if (data.sections.length === 0) return 'A Tutor must be assigned to at least one section.';
 
-    // Check if this faculty is already a tutor for another section
-    const existingTutor = faculty.find(
-      f => f.id !== excludeId && f.is_tutor && f.name === data.name
-    );
-    if (existingTutor && existingTutor.section !== section) {
-      return `Faculty "${data.name}" is already assigned as Tutor for ${existingTutor.section}.`;
-    }
+    // For tutor, only allow ONE section (tutor is 1:1 with section)
+    if (data.sections.length > 1) return 'A Tutor can only be assigned to one section.';
+
+    const tutorSection = data.sections[0];
 
     // Check if section already has a tutor
     const sectionTutor = faculty.find(
-      f => f.id !== excludeId && f.is_tutor && f.section === section
+      f => f.id !== excludeId && f.is_tutor && (f.sections?.includes(tutorSection) || f.section === tutorSection)
     );
     if (sectionTutor) {
-      return `Section ${section} already has a Tutor: ${sectionTutor.name}.`;
+      return `Section ${tutorSection} already has a Tutor: ${sectionTutor.name}.`;
     }
 
     return null;
@@ -186,7 +185,8 @@ export default function AdminFaculty() {
             qualification: data.qualification || null,
             yearsOfExperience: data.yearsOfExperience,
             currentSubjects: subjects,
-            section: data.section === 'none' ? null : data.section,
+            sections: data.sections,
+            section: data.isTutor && data.sections.length === 1 ? data.sections[0] : (data.sections[0] || null),
             isTutor: data.isTutor,
           },
         },
@@ -222,7 +222,7 @@ export default function AdminFaculty() {
       qualification: f.qualification || '',
       yearsOfExperience: f.years_of_experience || 0,
       currentSubjects: f.current_subjects?.join(', ') || '',
-      section: (f.section as FacultyFormData['section']) || 'none',
+      sections: f.sections || (f.section ? [f.section] : []),
       isTutor: f.is_tutor || false,
     });
     setIsEditDialogOpen(true);
@@ -251,7 +251,8 @@ export default function AdminFaculty() {
           qualification: data.qualification || null,
           years_of_experience: data.yearsOfExperience,
           current_subjects: subjects,
-          section: data.section === 'none' ? null : (data.section as any),
+          sections: data.sections,
+          section: data.isTutor && data.sections.length === 1 ? (data.sections[0] as any) : (data.sections[0] as any || null),
           is_tutor: data.isTutor,
         })
         .eq('id', editingFaculty.id);
@@ -415,22 +416,29 @@ export default function AdminFaculty() {
         />
         <FormField
           control={formInstance.control}
-          name="section"
+          name="sections"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Assigned Section</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger><SelectValue placeholder="Select section" /></SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No Section</SelectItem>
-                  <SelectItem value="CSE A">CSE A</SelectItem>
-                  <SelectItem value="CSE B">CSE B</SelectItem>
-                  <SelectItem value="CSE C">CSE C</SelectItem>
-                  <SelectItem value="CSE D">CSE D</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Assigned Sections</FormLabel>
+              <FormDescription>Select one or more sections this faculty teaches in</FormDescription>
+              <div className="grid grid-cols-2 gap-2">
+                {SECTIONS.map((sec) => (
+                  <label key={sec} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent/50 transition-colors">
+                    <Checkbox
+                      checked={field.value?.includes(sec)}
+                      onCheckedChange={(checked) => {
+                        const current = field.value || [];
+                        if (checked) {
+                          field.onChange([...current, sec]);
+                        } else {
+                          field.onChange(current.filter((s: string) => s !== sec));
+                        }
+                      }}
+                    />
+                    <span className="text-sm font-medium">{sec}</span>
+                  </label>
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -579,7 +587,11 @@ export default function AdminFaculty() {
                         <TableCell className="hidden md:table-cell">{f.qualification || '-'}</TableCell>
                         <TableCell className="hidden md:table-cell">{f.years_of_experience} yrs</TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          {f.section ? <Badge variant="outline">{f.section}</Badge> : '-'}
+                          {(f.sections && f.sections.length > 0) ? (
+                            <div className="flex flex-wrap gap-1">
+                              {f.sections.map(s => <Badge key={s} variant="outline">{s}</Badge>)}
+                            </div>
+                          ) : f.section ? <Badge variant="outline">{f.section}</Badge> : '-'}
                         </TableCell>
                         <TableCell>
                           {f.is_tutor ? (
