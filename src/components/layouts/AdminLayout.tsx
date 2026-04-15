@@ -19,6 +19,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Zap, label: 'HOD Command', path: '/admin/hod-command' },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
   { icon: GraduationCap, label: 'Students', path: '/admin/students' },
   { icon: Users, label: 'Faculty', path: '/admin/faculty' },

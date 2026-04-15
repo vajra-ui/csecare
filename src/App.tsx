@@ -26,6 +26,7 @@ import AdminAuditLogs from "@/pages/admin/AdminAuditLogs";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminRiskAnalysis from "@/pages/admin/AdminRiskAnalysis";
 import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminHODCommandCenter from "@/pages/admin/AdminHODCommandCenter";
 
 // Faculty Pages
 import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
@@ -129,6 +130,7 @@ function AppRoutes() {
       <Route path="/admin/substitutes" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminSubstitutes /></ProtectedRoute>} />
       <Route path="/admin/absence-reports" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAbsenceReports /></ProtectedRoute>} />
       <Route path="/admin/faculty-leaves" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminFacultyLeaves /></ProtectedRoute>} />
+      <Route path="/admin/hod-command" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminHODCommandCenter /></ProtectedRoute>} />
       
       {/* Faculty Routes */}
       <Route path="/faculty" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyDashboard /></ProtectedRoute>} />
