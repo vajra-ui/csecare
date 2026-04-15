@@ -150,7 +150,7 @@ export default function AdminHODCommandCenter() {
         : null;
       const lowAtt = pct < 75;
       const lowCgpa = latestCgpa != null && Number(latestCgpa) < 5;
-      const riskLevel = lowAtt && lowCgpa ? 'HIGH' : (lowAtt || lowCgpa) ? 'MEDIUM' : 'LOW';
+      const riskLevel: 'HIGH' | 'MEDIUM' | 'LOW' = lowAtt && lowCgpa ? 'HIGH' : (lowAtt || lowCgpa) ? 'MEDIUM' : 'LOW';
       return { name: s.name, roll_number: s.roll_number, section: s.section, attendance: pct, cgpa: latestCgpa ? Number(latestCgpa) : null, riskLevel };
     }).filter(s => s.riskLevel !== 'LOW').sort((a, b) => a.riskLevel === 'HIGH' ? -1 : 1);
   }, [students, attendance, academic]);
