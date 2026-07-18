@@ -85,15 +85,19 @@ export default function FacultyDashboard() {
         supabase.from('attendance').select('is_present, student_id').eq('faculty_id', faculty.id).gte('date', monthStart.toISOString().split('T')[0]),
       ]);
 
-      if (assignmentsRes.data) {
-        const withCounts = await Promise.all(
-          assignmentsRes.data.map(async (a: any) => {
-            const { count } = await supabase.from('assignment_submissions').select('id', { count: 'exact', head: true }).eq('assignment_id', a.id);
-            return { ...a, submission_count: count || 0 };
-          })
-        );
-        setUpcomingAssignments(withCounts);
+      if (assignmentsRes.data && assignmentsRes.data.length > 0) {
+        // Single query instead of N+1: fetch all submissions for these assignments,
+        // then count client-side.
+        const ids = assignmentsRes.data.map((a: any) => a.id);
+        const { data: subRows } = await supabase
+          .from('assignment_submissions')
+          .select('assignment_id')
+          .in('assignment_id', ids);
+        const counts = new Map<string, number>();
+        (subRows || []).forEach((r: any) => counts.set(r.assignment_id, (counts.get(r.assignment_id) || 0) + 1));
+        setUpcomingAssignments(assignmentsRes.data.map((a: any) => ({ ...a, submission_count: counts.get(a.id) || 0 })));
       }
+
 
       if (submissionsRes.data) {
         setRecentSubmissions(submissionsRes.data.map((s: any) => ({

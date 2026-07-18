@@ -31,7 +31,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<AuthUser | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,29 +42,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<AuthUser | null> => {
     try {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
+      return currentUser;
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);
+      return null;
     }
   };
 
   useEffect(() => {
+    // Hydrate immediately from the cached session — avoids waiting on a full
+    // getCurrentUser() round-trip before the app can render.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        refreshUser().finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         if (session?.user) {
-          await refreshUser();
+          const currentUser = await refreshUser();
           setLoading(false);
-          // Warm welcome only on a fresh sign-in — not on tab refreshes/token refresh.
           if (event === 'SIGNED_IN') {
             const key = `welcomed:${session.user.id}:${session.access_token.slice(-12)}`;
             if (!sessionStorage.getItem(key)) {
               sessionStorage.setItem(key, '1');
-              const currentUser = await getCurrentUser();
               fireWelcomeToast(currentUser?.name);
             }
           }
@@ -75,17 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        refreshUser().finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-
     return () => subscription.unsubscribe();
   }, []);
+
 
   const logout = async () => {
     await authLogout();

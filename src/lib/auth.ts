@@ -51,8 +51,8 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
 
   const role: UserRole = faculty.is_tutor ? 'TUTOR' : 'FACULTY';
 
-  // Upsert role into user_roles so getCurrentUser() can find it
-  await supabase
+  // Fire-and-forget role upsert — don't block login on it
+  void supabase
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role }, { onConflict: 'user_id' });
 
@@ -96,8 +96,8 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     throw new Error('Student record not found. Please contact admin.');
   }
 
-  // Upsert role for students
-  await supabase
+  // Fire-and-forget role upsert — don't block login on it
+  void supabase
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role: 'STUDENT' as any }, { onConflict: 'user_id' });
 
@@ -110,94 +110,51 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
   };
 }
 
+
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: roleData } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  // Query role, faculty, and student rows in parallel — pick whichever matches.
+  // Previously these ran sequentially (role → faculty → student), doubling latency.
+  const [roleRes, facultyRes, studentRes] = await Promise.all([
+    supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle(),
+    supabase.from('faculty').select('*').eq('user_id', user.id).maybeSingle(),
+    supabase.from('students').select('*').eq('user_id', user.id).maybeSingle(),
+  ]);
 
-  // ✅ FIX 2: If no role row yet (race condition right after login),
-  // fall back to checking faculty/student tables directly
-  if (!roleData) {
-    const { data: faculty } = await supabase
-      .from('faculty')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (faculty) {
-      return {
-        id: faculty.id,
-        email: user.email,
-        role: faculty.is_tutor ? 'TUTOR' : 'FACULTY',
-        name: faculty.name,
-        facultyId: faculty.faculty_id,
-        isTutor: faculty.is_tutor,
-      };
-    }
-
-    const { data: student } = await supabase
-      .from('students')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (student) {
-      return {
-        id: student.id,
-        email: user.email,
-        role: 'STUDENT',
-        name: student.name,
-        studentId: student.id,
-      };
-    }
-
-    return null;
-  }
-
-  const role = roleData.role as UserRole;
+  const role = roleRes.data?.role as UserRole | undefined;
+  const faculty = facultyRes.data;
+  const student = studentRes.data;
 
   if (role === 'ADMIN') {
     return { id: user.id, email: user.email, role: 'ADMIN', name: 'Administrator' };
   }
 
-  if (role === 'FACULTY' || role === 'TUTOR') {
-    const { data: faculty } = await supabase
-      .from('faculty').select('*').eq('user_id', user.id).single();
-
-    if (faculty) {
-      return {
-        id: faculty.id,
-        email: user.email,
-        role: faculty.is_tutor ? 'TUTOR' : 'FACULTY',
-        name: faculty.name,
-        facultyId: faculty.faculty_id,
-        isTutor: faculty.is_tutor,
-      };
-    }
+  if (faculty) {
+    return {
+      id: faculty.id,
+      email: user.email,
+      role: faculty.is_tutor ? 'TUTOR' : 'FACULTY',
+      name: faculty.name,
+      facultyId: faculty.faculty_id,
+      isTutor: faculty.is_tutor,
+    };
   }
 
-  if (role === 'STUDENT') {
-    const { data: student } = await supabase
-      .from('students').select('*').eq('user_id', user.id).single();
-
-    if (student) {
-      return {
-        id: student.id,
-        email: user.email,
-        role: 'STUDENT',
-        name: student.name,
-        studentId: student.id,
-      };
-    }
+  if (student) {
+    return {
+      id: student.id,
+      email: user.email,
+      role: 'STUDENT',
+      name: student.name,
+      studentId: student.id,
+    };
   }
 
   return null;
 }
+
 
 export async function logout(): Promise<void> {
   await supabase.auth.signOut();
