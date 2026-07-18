@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Users, GraduationCap, Megaphone, Settings, LogOut, LayoutDashboard,
-  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck, AlertTriangle, UserCog, Calendar,
+  FileSpreadsheet, ClipboardList, BarChart3, Moon, Sun, FileText, Brain, Zap, CalendarOff, Trophy, UserCheck, AlertTriangle, UserCog, Calendar, Briefcase,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ const navItems = [
   { icon: Brain, label: 'AI Risk Analysis', path: '/admin/risk-analysis' },
   { icon: UserCheck, label: 'Alumni Network', path: '/admin/alumni' },
   { icon: Trophy, label: 'Achievements', path: '/admin/showcase' },
+  { icon: Briefcase, label: 'Placement War Room', path: '/admin/placements' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
