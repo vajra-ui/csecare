@@ -63,15 +63,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Hydrate immediately from the cached session — avoids waiting on a full
-    // getCurrentUser() round-trip before the app can render.
+    // Instant hydrate from a cached offline user so protected routes render
+    // immediately (even if the Supabase network call is slow or offline).
+    const cached = getOfflineUser();
+    if (cached) setUser(cached);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
         refreshUser().finally(() => setLoading(false));
       } else {
+        if (!cached) setUser(null);
         setLoading(false);
       }
+    }).catch(() => {
+      // Network / Supabase unreachable — keep the offline user if we have one.
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -88,7 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } else {
-          setUser(null);
+          // No live session — keep any cached offline user for offline access.
+          const offline = getOfflineUser();
+          setUser(offline);
           setLoading(false);
         }
       }
