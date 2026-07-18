@@ -1,0 +1,18 @@
+{
+  "name": "CSE CARE — Paavai Academic Portal",
+  "short_name": "CSE CARE",
+  "description": "Paavai Engineering College CSE academic management portal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b12",
+  "theme_color": "#0b0b12",
+  "icons": [
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/HwOWWt2mLVfyJL0GflL5eXtfZDl1/uploads/1770219827469-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
