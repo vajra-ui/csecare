@@ -248,12 +248,38 @@ export default function AdminSubstitutes() {
                   <div><span className="text-muted-foreground">Subject:</span> {assignDialog.subject}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Available Faculty</label>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <span className="text-primary">✨ Smart Suggestions</span>
+                    <span className="text-xs text-muted-foreground font-normal">Ranked by subject fit, section, workload, past subs</span>
+                  </label>
+                  <div className="space-y-2 mb-3">
+                    {getRankedFaculty(assignDialog.hour, assignDialog.section, assignDialog.subject).slice(0, 3).map((f: any, idx: number) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setSelectedSub(f.id)}
+                        className={`w-full text-left rounded-lg border p-3 transition-all ${selectedSub === f.id ? 'border-primary bg-primary/10' : 'border-border/60 bg-card/40 hover:border-primary/50'}`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={idx === 0 ? 'bg-success/20 text-success border-success/40' : 'bg-muted/40'}>
+                              #{idx + 1} {idx === 0 && '· Best fit'}
+                            </Badge>
+                            <span className="font-medium text-sm">{f.name}</span>
+                            <span className="text-xs text-muted-foreground">{f.faculty_id}</span>
+                          </div>
+                          <span className="text-xs font-bold text-primary">score {f.score}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">{f.reasons.join(' · ')}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <label className="text-xs font-medium mb-2 block text-muted-foreground">Or pick from all available</label>
                   <Select value={selectedSub} onValueChange={setSelectedSub}>
                     <SelectTrigger><SelectValue placeholder="Select substitute" /></SelectTrigger>
                     <SelectContent>
-                      {getAvailableFaculty(assignDialog.hour, assignDialog.section).map(f => (
-                        <SelectItem key={f.id} value={f.id}>{f.name} ({f.faculty_id})</SelectItem>
+                      {getRankedFaculty(assignDialog.hour, assignDialog.section, assignDialog.subject).map((f: any) => (
+                        <SelectItem key={f.id} value={f.id}>{f.name} ({f.faculty_id}) · score {f.score}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
