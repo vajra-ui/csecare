@@ -95,7 +95,17 @@ import StudentQRScan from "@/pages/student/StudentQRScan";
 import StudentMentorship from "@/pages/student/StudentMentorship";
 import AlumniMentorshipInbox from "@/pages/alumni/AlumniMentorshipInbox";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 min - data considered fresh
+      gcTime: 5 * 60 * 1000, // 5 min - cache retention
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
   const { user, loading } = useAuth();

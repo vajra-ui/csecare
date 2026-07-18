@@ -1,0 +1,10 @@
+CREATE INDEX IF NOT EXISTS idx_subject_scores_student_created ON public.subject_scores(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_student_activities_created ON public.student_activities(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_od_requests_created ON public.od_requests(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_results_student ON public.results(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON public.audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_grade_audit_student_created ON public.grade_audit(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_announcements_created ON public.announcements(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_weekly_reports_student_created ON public.weekly_reports(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_faculty_sections_gin ON public.faculty USING GIN (sections);
+CREATE INDEX IF NOT EXISTS idx_students_reg ON public.students(register_number);
