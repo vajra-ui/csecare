@@ -1870,6 +1870,49 @@ export type Database = {
     }
     Functions: {
       generate_faculty_id: { Args: never; Returns: string }
+      get_admin_alumni_records: {
+        Args: never
+        Returns: {
+          company: string
+          created_at: string
+          department: string
+          email: string
+          graduation_year: number
+          id: string
+          linkedin: string
+          location: string
+          name: string
+          phone: string
+          profile_image_url: string
+          role: string
+        }[]
+      }
+      get_admin_faculty_records: {
+        Args: never
+        Returns: {
+          address: string
+          bio: string
+          created_at: string
+          current_subjects: string[]
+          dob: string
+          faculty_id: string
+          id: string
+          is_tutor: boolean
+          linkedin_url: string
+          name: string
+          personal_email: string
+          phone: string
+          profile_photo_url: string
+          qualification: string
+          research_interests: string[]
+          section: Database["public"]["Enums"]["section_type"]
+          sections: string[]
+          specialization: string
+          updated_at: string
+          user_id: string
+          years_of_experience: number
+        }[]
+      }
       get_attendance_percentage: {
         Args: { _student_id: string }
         Returns: number
