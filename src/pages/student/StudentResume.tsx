@@ -57,7 +57,7 @@ export default function StudentResume() {
               <p className="text-sm text-muted-foreground">
                 {profile.register_number} · CSE · Year {profile.year} · Section {profile.section}
               </p>
-              <p className="text-sm">{""} · {"" || ''}</p>
+              <p className="text-sm">Roll No: {profile.roll_number}</p>
             </header>
 
             <section>
