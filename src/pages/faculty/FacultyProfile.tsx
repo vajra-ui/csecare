@@ -25,6 +25,8 @@ const facultySchema = z.object({
   linkedin_url: z.string().trim().max(255).url('Invalid URL').or(z.literal('')),
 });
 
+const FACULTY_PROFILE_COLUMNS = 'id, user_id, faculty_id, name, qualification, years_of_experience, current_subjects, section, sections, is_tutor, bio, linkedin_url, specialization, research_interests, profile_photo_url';
+
 export default function FacultyProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -50,14 +52,21 @@ export default function FacultyProfile() {
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser) return;
-      const { data } = await supabase.from('faculty').select('*').eq('user_id', authUser.id).single();
+      const { data, error } = await supabase
+        .from('faculty')
+        .select(FACULTY_PROFILE_COLUMNS)
+        .eq('user_id', authUser.id)
+        .single();
+      if (error) throw error;
       if (data) {
         const d = data as any;
+        const { data: pii } = await supabase.rpc('get_faculty_pii', { _faculty_id: d.id });
+        const privateDetails = pii?.[0] || {};
         setFacultyData(d);
         setForm({
-          phone: d.phone || '',
-          personal_email: d.personal_email || '',
-          address: d.address || '',
+          phone: privateDetails.phone || '',
+          personal_email: privateDetails.personal_email || '',
+          address: privateDetails.address || '',
           qualification: d.qualification || '',
           years_of_experience: d.years_of_experience || 0,
           specialization: d.specialization || '',

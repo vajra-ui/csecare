@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { saveCredentialForOffline, clearOfflineCurrent } from "./offlineAuth";
 
+const FACULTY_AUTH_COLUMNS = 'id, user_id, faculty_id, name, qualification, years_of_experience, current_subjects, section, sections, is_tutor';
+
 export type UserRole = 'ADMIN' | 'FACULTY' | 'TUTOR' | 'STUDENT';
 
 export interface AuthUser {
@@ -43,7 +45,7 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
 
   const { data: faculty, error: facultyError } = await supabase
     .from('faculty')
-    .select('*')
+    .select(FACULTY_AUTH_COLUMNS)
     .eq('user_id', authData.user.id)
     .single();
 
@@ -126,7 +128,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   // Previously these ran sequentially (role → faculty → student), doubling latency.
   const [roleRes, facultyRes, studentRes] = await Promise.all([
     supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle(),
-    supabase.from('faculty').select('*').eq('user_id', user.id).maybeSingle(),
+    supabase.from('faculty').select(FACULTY_AUTH_COLUMNS).eq('user_id', user.id).maybeSingle(),
     supabase.from('students').select('*').eq('user_id', user.id).maybeSingle(),
   ]);
 
