@@ -120,7 +120,12 @@ export default function AdminODRequests() {
         const msg = action === 'approve'
           ? warmMessages.odApproved(selectedRequest.student.name)
           : warmMessages.odRejected(remarks || undefined);
-        await pushNotification({ userId: selectedRequest.student.user_id, ...msg, link: '/student/od' });
+        await pushNotification({
+          userId: selectedRequest.student.user_id,
+          ...msg,
+          link: '/student/od',
+          dedupeKey: `od:${selectedRequest.id}:admin:${action}`,
+        });
       }
 
       toast({
