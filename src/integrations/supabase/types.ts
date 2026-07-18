@@ -1036,6 +1036,59 @@ export type Database = {
           },
         ]
       }
+      placements: {
+        Row: {
+          company: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          offer_date: string
+          offer_type: string
+          package_lpa: number | null
+          role: string | null
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          offer_date?: string
+          offer_type?: string
+          package_lpa?: number | null
+          role?: string | null
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          offer_date?: string
+          offer_type?: string
+          package_lpa?: number | null
+          role?: string | null
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "placements_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
