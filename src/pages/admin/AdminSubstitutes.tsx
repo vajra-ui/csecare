@@ -47,13 +47,30 @@ export default function AdminSubstitutes() {
     return timetable.filter(t => t.faculty_id === leave.faculty?.id && t.day_of_week === dayOfWeek);
   };
 
-  const getAvailableFaculty = (hour: number, section: string) => {
+  const getRankedFaculty = (hour: number, section: string, subject: string) => {
     const dayOfWeek = new Date(filterDate).getDay();
     const busyFacultyIds = timetable.filter(t => t.day_of_week === dayOfWeek && t.hour_number === hour).map(t => t.faculty_id);
     const onLeaveFacultyIds = leaves.map(l => l.faculty?.id).filter(Boolean);
     const alreadyAssigned = substitutes.filter(s => s.hour_number === hour && s.date === filterDate).map(s => s.substitute_faculty_id);
-    return allFaculty.filter(f => !busyFacultyIds.includes(f.id) && !onLeaveFacultyIds.includes(f.id) && !alreadyAssigned.includes(f.id));
+    const available = allFaculty.filter(f => !busyFacultyIds.includes(f.id) && !onLeaveFacultyIds.includes(f.id) && !alreadyAssigned.includes(f.id));
+
+    // Score: subject match (+50), section match (+20), workload penalty (-hours), past sub count penalty (-3 each)
+    return available.map(f => {
+      const workload = timetable.filter(t => t.faculty_id === f.id && t.day_of_week === dayOfWeek).length;
+      const pastSubs = substitutes.filter(s => s.substitute_faculty_id === f.id).length;
+      const subjectMatch = (f.current_subjects || []).some((s: string) => s?.toLowerCase() === subject?.toLowerCase());
+      const sectionMatch = f.section === section || (f.sections || []).includes(section);
+      const score = (subjectMatch ? 50 : 0) + (sectionMatch ? 20 : 0) - workload * 2 - pastSubs * 3;
+      const reasons: string[] = [];
+      if (subjectMatch) reasons.push('Teaches ' + subject);
+      if (sectionMatch) reasons.push('Handles ' + section);
+      reasons.push(`Load ${workload}h`);
+      if (pastSubs) reasons.push(`${pastSubs} recent subs`);
+      return { ...f, score, workload, pastSubs, subjectMatch, sectionMatch, reasons };
+    }).sort((a, b) => b.score - a.score);
   };
+
+  const getAvailableFaculty = (hour: number, section: string) => getRankedFaculty(hour, section, '');
 
   const assignSubstitute = async () => {
     if (!selectedSub || !assignDialog) return;
