@@ -48,30 +48,8 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
           <div className="flex flex-col items-center text-center space-y-6">
             <div className="relative animate-scale-in">
-              {/* Layered glow rings */}
-              <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-neon-cyan/30 via-neon-purple/30 to-neon-pink/30 blur-2xl animate-pulse" />
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-neon-cyan/40 to-neon-purple/40 blur-md" />
-              {/* Rotating conic ring */}
-              <div
-                className="absolute -inset-3 rounded-full opacity-70"
-                style={{
-                  background:
-                    'conic-gradient(from 0deg, hsl(var(--neon-cyan)), hsl(var(--neon-purple)), hsl(var(--neon-pink)), hsl(var(--neon-cyan)))',
-                  animation: 'spin 8s linear infinite',
-                  padding: '2px',
-                  WebkitMask:
-                    'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))',
-                          mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))',
-                }}
-              />
-              {/* Logo frame */}
-              <div className="relative bg-gradient-to-br from-card/95 to-card/70 backdrop-blur-2xl p-6 rounded-3xl border-2 border-neon-cyan/40 shadow-[0_0_60px_hsl(var(--neon-cyan)/0.4)]">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-transparent via-neon-cyan/5 to-neon-purple/10 pointer-events-none" />
-                {/* Corner accents */}
-                <span className="absolute top-2 left-2 h-3 w-3 border-t-2 border-l-2 border-neon-cyan rounded-tl-lg" />
-                <span className="absolute top-2 right-2 h-3 w-3 border-t-2 border-r-2 border-neon-purple rounded-tr-lg" />
-                <span className="absolute bottom-2 left-2 h-3 w-3 border-b-2 border-l-2 border-neon-purple rounded-bl-lg" />
-                <span className="absolute bottom-2 right-2 h-3 w-3 border-b-2 border-r-2 border-neon-cyan rounded-br-lg" />
+              {/* Clean professional logo frame */}
+              <div className="relative bg-card p-5 rounded-2xl border border-border/60 shadow-lg">
                 <PaavaiLogo size="xl" />
               </div>
             </div>
