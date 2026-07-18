@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, FileText, RefreshCw, Download, MessageSquare, Eye } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { downloadCSV } from '@/lib/csvExport';
+import { pushNotification, warmMessages } from '@/lib/notifyWarm';
 
 export default function TutorWeeklyReports() {
   const { user } = useAuth();
