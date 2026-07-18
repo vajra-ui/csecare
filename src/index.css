@@ -331,9 +331,15 @@
 
   .grid-pattern {
     background-image: 
+      linear-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .dark .grid-pattern {
+    background-image: 
       linear-gradient(hsl(var(--neon-cyan) / 0.03) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--neon-cyan) / 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
   }
 }
 
