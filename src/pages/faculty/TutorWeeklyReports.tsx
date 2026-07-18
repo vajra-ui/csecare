@@ -76,6 +76,13 @@ export default function TutorWeeklyReports() {
 
   const verifyActivity = async (activityId: string) => {
     await supabase.from('student_activities').update({ status: 'verified', verified_by: tutorId, verified_at: new Date().toISOString() }).eq('id', activityId);
+    const activity = activities.find(a => a.id === activityId);
+    if (activity) {
+      const { data: stud } = await supabase.from('students').select('user_id').eq('id', activity.student_id).maybeSingle();
+      if (stud?.user_id) {
+        await pushNotification({ userId: stud.user_id, ...warmMessages.achievementApproved(activity.title || 'Your achievement'), link: '/student/achievements' });
+      }
+    }
     toast({ title: 'Verified', description: 'Activity marked as verified.' });
     fetchData();
   };
