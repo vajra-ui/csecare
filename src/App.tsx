@@ -82,6 +82,10 @@ import StudentGPACalc from "@/pages/student/StudentGPACalc";
 import StudentExamTimetable from "@/pages/student/StudentExamTimetable";
 import StudentFeedback from "@/pages/student/StudentFeedback";
 import StudentMessages from "@/pages/student/StudentMessages";
+import StudentComplaintBox from "@/pages/student/StudentComplaintBox";
+import StudentDoubtAssistant from "@/pages/student/StudentDoubtAssistant";
+import TutorComplaints from "@/pages/faculty/TutorComplaints";
+import TutorStudyBuddies from "@/pages/faculty/TutorStudyBuddies";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +155,8 @@ function AppRoutes() {
       <Route path="/faculty/announcements" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyAnnouncements /></ProtectedRoute>} />
       <Route path="/faculty/absence-reports" element={<ProtectedRoute allowedRoles={['TUTOR']}><TutorAbsenceReports /></ProtectedRoute>} />
       <Route path="/faculty/weekly-reports" element={<ProtectedRoute allowedRoles={['TUTOR']}><TutorWeeklyReports /></ProtectedRoute>} />
+      <Route path="/faculty/complaints" element={<ProtectedRoute allowedRoles={['TUTOR']}><TutorComplaints /></ProtectedRoute>} />
+      <Route path="/faculty/study-buddies" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><TutorStudyBuddies /></ProtectedRoute>} />
       
       {/* Student Routes */}
       <Route path="/student" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDashboard /></ProtectedRoute>} />
@@ -167,6 +173,8 @@ function AppRoutes() {
       <Route path="/student/feedback" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentFeedback /></ProtectedRoute>} />
       <Route path="/student/messages" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMessages /></ProtectedRoute>} />
       <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
+      <Route path="/student/complaint-box" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentComplaintBox /></ProtectedRoute>} />
+      <Route path="/student/doubt-assistant" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDoubtAssistant /></ProtectedRoute>} />
       
       {/* COE Routes */}
       <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />

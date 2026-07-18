@@ -203,6 +203,53 @@ export type Database = {
         }
         Relationships: []
       }
+      anonymous_complaints: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          resolved_at: string | null
+          section: Database["public"]["Enums"]["section_type"]
+          status: string
+          student_id: string
+          tutor_response: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          resolved_at?: string | null
+          section: Database["public"]["Enums"]["section_type"]
+          status?: string
+          student_id: string
+          tutor_response?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          resolved_at?: string | null
+          section?: Database["public"]["Enums"]["section_type"]
+          status?: string
+          student_id?: string
+          tutor_response?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anonymous_complaints_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -1321,6 +1368,57 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_buddy_pairs: {
+        Row: {
+          complementary_subjects: Json
+          created_at: string
+          generated_by: string | null
+          id: string
+          match_score: number
+          reasoning: string | null
+          section: Database["public"]["Enums"]["section_type"]
+          student_a: string
+          student_b: string
+        }
+        Insert: {
+          complementary_subjects?: Json
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          match_score?: number
+          reasoning?: string | null
+          section: Database["public"]["Enums"]["section_type"]
+          student_a: string
+          student_b: string
+        }
+        Update: {
+          complementary_subjects?: Json
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          match_score?: number
+          reasoning?: string | null
+          section?: Database["public"]["Enums"]["section_type"]
+          student_a?: string
+          student_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_buddy_pairs_student_a_fkey"
+            columns: ["student_a"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_buddy_pairs_student_b_fkey"
+            columns: ["student_b"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]

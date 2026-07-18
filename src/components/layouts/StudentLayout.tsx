@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity, Shield, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ const navItems = [
   { icon: Star, label: 'Feedback', path: '/student/feedback' },
   { icon: Activity, label: 'Activities', path: '/student/activities' },
   { icon: Mail, label: 'Messages', path: '/student/messages' },
+  { icon: Sparkles, label: 'AI Doubt Assistant', path: '/student/doubt-assistant' },
+  { icon: Shield, label: 'Complaint Box', path: '/student/complaint-box' },
 ];
 
 export function StudentLayout({ children }: StudentLayoutProps) {
