@@ -10,8 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trophy, Award, Download } from 'lucide-react';
+import { Plus, Trophy, Award, Download, FileText, Sparkles } from 'lucide-react';
 import { downloadCSV } from '@/lib/csvExport';
+import { generatePortfolioPDF } from '@/lib/pdfReports';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
 
 export default function StudentAchievements() {
   const { user } = useAuth();
@@ -63,6 +66,39 @@ export default function StudentAchievements() {
     })), 'my-achievements');
   };
 
+  const handlePortfolioPDF = async () => {
+    // Fetch student info + latest CGPA + activities in parallel
+    const [{ data: s }, { data: cg }, { data: acts }] = await Promise.all([
+      supabase.from('students').select('name, roll_number, register_number, section, year').eq('id', user!.studentId!).single(),
+      supabase.from('academic_records').select('cgpa').eq('student_id', user!.studentId!).order('semester', { ascending: false }).limit(1),
+      supabase.from('student_activities').select('title, category, event_date, status').eq('student_id', user!.studentId!).order('event_date', { ascending: false }),
+    ]);
+    if (!s) { toast({ title: 'Could not load profile', variant: 'destructive' }); return; }
+    generatePortfolioPDF({
+      studentName: s.name,
+      rollNumber: s.roll_number,
+      registerNumber: s.register_number,
+      section: s.section,
+      year: s.year,
+      email: user?.email,
+      cgpa: cg?.[0]?.cgpa ?? null,
+      achievements: achievements.map(a => ({
+        title: a.title, category: a.category, date: a.date, description: a.description, verified: !!a.verified,
+      })),
+      activities: (acts || []) as any,
+    });
+    toast({ title: '📄 Portfolio ready', description: 'Your resume-style PDF is downloading.' });
+  };
+
+  // Group achievements by year (from student admission → now) for timeline
+  const timelineGroups = achievements.reduce((acc: Record<string, any[]>, a) => {
+    const yr = new Date(a.date).getFullYear().toString();
+    (acc[yr] = acc[yr] || []).push(a);
+    return acc;
+  }, {});
+  const timelineYears = Object.keys(timelineGroups).sort();
+
+
   const categoryIcons: Record<string, string> = { academic: '📚', sports: '🏆', cultural: '🎭', technical: '💻', other: '⭐' };
   const categoryColors: Record<string, string> = {
     academic: 'bg-primary/10 text-primary', sports: 'bg-green-500/10 text-green-700',
@@ -74,10 +110,14 @@ export default function StudentAchievements() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl md:text-3xl font-bold">Achievement Portfolio</h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleDownload} disabled={achievements.length === 0}>
-              <Download className="h-4 w-4 mr-1" /> Export
+              <Download className="h-4 w-4 mr-1" /> CSV
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePortfolioPDF} disabled={achievements.length === 0}>
+              <FileText className="h-4 w-4 mr-1" /> Portfolio PDF
+            </Button>
+
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Add</Button></DialogTrigger>
               <DialogContent>
@@ -121,35 +161,75 @@ export default function StudentAchievements() {
             <p>No achievements yet. Start building your portfolio!</p>
           </CardContent></Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {achievements.map(a => (
-              <Card key={a.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-2xl">{categoryIcons[a.category] || '⭐'}</span>
-                    <div className="flex gap-2">
-                      <Badge className={categoryColors[a.category] || ''} variant="outline">{a.category}</Badge>
-                      {a.verified && <Badge variant="secondary" className="text-green-700">✓ Verified</Badge>}
+          <Tabs defaultValue="grid" className="w-full">
+            <TabsList>
+              <TabsTrigger value="grid"><Trophy className="h-4 w-4 mr-1" /> Grid</TabsTrigger>
+              <TabsTrigger value="timeline"><Sparkles className="h-4 w-4 mr-1" /> Growth Timeline</TabsTrigger>
+            </TabsList>
+            <TabsContent value="grid" className="mt-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {achievements.map(a => (
+                  <Card key={a.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="text-2xl">{categoryIcons[a.category] || '⭐'}</span>
+                        <div className="flex gap-2">
+                          <Badge className={categoryColors[a.category] || ''} variant="outline">{a.category}</Badge>
+                          {a.verified && <Badge variant="secondary" className="text-green-700">✓ Verified</Badge>}
+                        </div>
+                      </div>
+                      <h3 className="font-semibold mb-1">{a.title}</h3>
+                      {a.description && <p className="text-sm text-muted-foreground mb-2">{a.description}</p>}
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString('en-IN')}</span>
+                        {a.certificate_url && (
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            const { data } = await supabase.storage.from('student-documents').createSignedUrl(a.certificate_url, 3600);
+                            if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                          }}>
+                            <Award className="h-3 w-3 mr-1" /> View Cert
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="timeline" className="mt-4">
+              <div className="relative pl-8 border-l-2 border-primary/30 space-y-8">
+                {timelineYears.map(yr => (
+                  <div key={yr} className="relative">
+                    <div className="absolute -left-[41px] top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center ring-4 ring-background">
+                      <Sparkles className="h-3 w-3 text-primary-foreground" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-primary mb-3">{yr}</h3>
+                    <div className="space-y-3">
+                      {timelineGroups[yr].map(a => (
+                        <Card key={a.id} className="hover:shadow-md transition">
+                          <CardContent className="pt-4 pb-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <span className="text-xl">{categoryIcons[a.category] || '⭐'}</span>
+                                <div>
+                                  <p className="font-semibold">{a.title}</p>
+                                  {a.description && <p className="text-xs text-muted-foreground mt-1">{a.description}</p>}
+                                  <p className="text-xs text-muted-foreground mt-1">{new Date(a.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
+                                </div>
+                              </div>
+                              {a.verified && <Badge variant="secondary" className="text-green-700">✓</Badge>}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   </div>
-                  <h3 className="font-semibold mb-1">{a.title}</h3>
-                  {a.description && <p className="text-sm text-muted-foreground mb-2">{a.description}</p>}
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString('en-IN')}</span>
-                    {a.certificate_url && (
-                      <Button variant="outline" size="sm" onClick={async () => {
-                        const { data } = await supabase.storage.from('student-documents').createSignedUrl(a.certificate_url, 3600);
-                        if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                      }}>
-                        <Award className="h-3 w-3 mr-1" /> View Cert
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
+
       </div>
     </StudentLayout>
   );

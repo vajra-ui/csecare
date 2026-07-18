@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FileText, Upload, Clock, CheckCircle, Check, X, Loader2 } from 'lucide-react';
+import { FileText, Upload, Clock, CheckCircle, Check, X, Loader2, Download } from 'lucide-react';
+import { generateODLetterPDF } from '@/lib/pdfReports';
+
 import { StudentLayout } from '@/components/layouts/StudentLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,8 +50,11 @@ interface ODRequest {
   status: 'submitted' | 'tutor_verified' | 'admin_approved' | 'completed' | 'rejected';
   tutor_remarks: string | null;
   admin_remarks: string | null;
+  tutor_id: string | null;
+  admin_approved_at: string | null;
   created_at: string;
 }
+
 
 const statusConfig = {
   submitted: { label: 'Submitted', color: 'bg-warning/20 text-warning-foreground', icon: Clock, step: 1 },
@@ -67,6 +72,9 @@ export default function StudentOD() {
   const [submitting, setSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentInfo, setStudentInfo] = useState<any>(null);
+  const [tutorNames, setTutorNames] = useState<Record<string, string>>({});
+
 
   const form = useForm<ODFormData>({
     resolver: zodResolver(odSchema),
@@ -88,12 +96,13 @@ export default function StudentOD() {
 
       const { data: studentData } = await supabase
         .from('students')
-        .select('id')
+        .select('id, name, roll_number, register_number, section, year')
         .eq('user_id', authUser.id)
         .single();
 
       if (studentData) {
         setStudentId(studentData.id);
+        setStudentInfo(studentData);
 
         const { data: odData } = await supabase
           .from('od_requests')
@@ -102,6 +111,15 @@ export default function StudentOD() {
           .order('created_at', { ascending: false });
 
         setRequests(odData || []);
+
+        // Resolve tutor names for real-time status ("Being reviewed by [Tutor]")
+        const tutorIds = Array.from(new Set((odData || []).map((o: any) => o.tutor_id).filter(Boolean)));
+        if (tutorIds.length > 0) {
+          const { data: tutors } = await supabase.from('faculty').select('user_id, name').in('user_id', tutorIds as string[]);
+          const map: Record<string, string> = {};
+          (tutors || []).forEach((t: any) => { map[t.user_id] = t.name; });
+          setTutorNames(map);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -109,6 +127,25 @@ export default function StudentOD() {
       setLoading(false);
     }
   };
+
+  const downloadLetter = (r: ODRequest) => {
+    if (!studentInfo) return;
+    generateODLetterPDF({
+      studentName: studentInfo.name,
+      rollNumber: studentInfo.roll_number,
+      registerNumber: studentInfo.register_number,
+      section: studentInfo.section,
+      year: studentInfo.year,
+      reason: r.reason,
+      startDate: r.start_date,
+      endDate: r.end_date,
+      tutorName: r.tutor_id ? tutorNames[r.tutor_id] : undefined,
+      approvedOn: r.admin_approved_at ? new Date(r.admin_approved_at).toLocaleDateString('en-IN') : undefined,
+      reference: `OD/${new Date(r.created_at).getFullYear()}/${r.id.substring(0, 6).toUpperCase()}`,
+    });
+    toast({ title: '📄 OD Letter ready', description: 'Downloading your printable letter.' });
+  };
+
 
   const onSubmit = async (data: ODFormData) => {
     if (!studentId) return;
@@ -324,6 +361,17 @@ export default function StudentOD() {
                       <p className="text-sm text-muted-foreground mb-1">Reason</p>
                       <p className="text-sm">{request.reason}</p>
                     </div>
+                    {/* Real-time reviewer name */}
+                    {request.status === 'submitted' && (
+                      <p className="text-xs text-info font-medium">
+                        ⏳ Being reviewed by {request.tutor_id ? tutorNames[request.tutor_id] || 'your tutor' : 'your tutor'}…
+                      </p>
+                    )}
+                    {request.status === 'tutor_verified' && (
+                      <p className="text-xs text-info font-medium">
+                        ✓ Verified by {request.tutor_id ? tutorNames[request.tutor_id] || 'your tutor' : 'your tutor'} — awaiting admin approval
+                      </p>
+                    )}
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Status Tracking</p>
                       {renderStatusTracker(request.status)}
@@ -340,7 +388,14 @@ export default function StudentOD() {
                         <p className="text-sm bg-muted p-2 rounded">{request.admin_remarks}</p>
                       </div>
                     )}
+                    {(request.status === 'admin_approved' || request.status === 'completed') && (
+                      <Button size="sm" variant="outline" onClick={() => downloadLetter(request)}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download OD Letter (PDF)
+                      </Button>
+                    )}
                   </CardContent>
+
                 </Card>
               );
             })
