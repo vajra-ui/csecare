@@ -707,6 +707,51 @@ export type Database = {
           },
         ]
       }
+      grade_audit: {
+        Row: {
+          action: string
+          changed_by: string | null
+          created_at: string
+          field: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          reason: string | null
+          source_row_id: string | null
+          source_table: string
+          student_id: string | null
+          subject: string | null
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          created_at?: string
+          field: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          reason?: string | null
+          source_row_id?: string | null
+          source_table: string
+          student_id?: string | null
+          subject?: string | null
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          created_at?: string
+          field?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          reason?: string | null
+          source_row_id?: string | null
+          source_table?: string
+          student_id?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       mentoring_sessions: {
         Row: {
           action_items: string | null
