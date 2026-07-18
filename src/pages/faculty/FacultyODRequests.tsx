@@ -108,7 +108,12 @@ export default function FacultyODRequests() {
         const msg = approve
           ? { title: '✅ OD forwarded to admin', message: `Nice, ${selectedRequest.student.name.split(' ')[0]} — your tutor cleared your OD. Waiting on admin approval.` }
           : warmMessages.odRejected(remarks || undefined);
-        await pushNotification({ userId: selectedRequest.student.user_id, ...msg, link: '/student/od' });
+        await pushNotification({
+          userId: selectedRequest.student.user_id,
+          ...msg,
+          link: '/student/od',
+          dedupeKey: `od:${selectedRequest.id}:tutor:${approve ? 'approve' : 'reject'}`,
+        });
       }
 
       toast({
