@@ -7,6 +7,7 @@ import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AchievementGallery } from '@/components/AchievementGallery';
+import { TechNewsBar } from '@/components/TechNewsBar';
 
 export default function HomePage() {
   const navigate = useNavigate();
