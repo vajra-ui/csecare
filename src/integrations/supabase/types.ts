@@ -1874,6 +1874,15 @@ export type Database = {
         Args: { _student_id: string }
         Returns: number
       }
+      get_faculty_pii: {
+        Args: { _faculty_id: string }
+        Returns: {
+          address: string
+          dob: string
+          personal_email: string
+          phone: string
+        }[]
+      }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_faculty: { Args: { _user_id: string }; Returns: boolean }
       is_message_participant: {
