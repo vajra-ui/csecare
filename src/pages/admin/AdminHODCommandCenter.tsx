@@ -15,6 +15,9 @@ import {
   PieChart as RPieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, LineChart, Line,
 } from 'recharts';
+import AnomalyRadar from '@/components/admin/AnomalyRadar';
+import FacultyLoadBalancer from '@/components/admin/FacultyLoadBalancer';
+import GradeLedgerCard from '@/components/GradeLedgerCard';
 
 const NEON_COLORS = [
   'hsl(185, 100%, 50%)',
@@ -297,6 +300,15 @@ export default function AdminHODCommandCenter() {
             </TabsTrigger>
             <TabsTrigger value="risk" className="font-body text-xs">
               <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />Risk Monitor
+            </TabsTrigger>
+            <TabsTrigger value="radar" className="font-body text-xs">
+              <Zap className="h-3.5 w-3.5 mr-1.5" />Anomaly Radar
+            </TabsTrigger>
+            <TabsTrigger value="load" className="font-body text-xs">
+              <Activity className="h-3.5 w-3.5 mr-1.5" />Load Balancer
+            </TabsTrigger>
+            <TabsTrigger value="ledger" className="font-body text-xs">
+              <Shield className="h-3.5 w-3.5 mr-1.5" />Grade Ledger
             </TabsTrigger>
           </TabsList>
 
@@ -641,6 +653,16 @@ export default function AdminHODCommandCenter() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="radar" className="space-y-4">
+            <AnomalyRadar />
+          </TabsContent>
+          <TabsContent value="load" className="space-y-4">
+            <FacultyLoadBalancer />
+          </TabsContent>
+          <TabsContent value="ledger" className="space-y-4">
+            <GradeLedgerCard limit={50} />
           </TabsContent>
         </Tabs>
       </div>

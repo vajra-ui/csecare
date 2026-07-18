@@ -31,7 +31,7 @@ export default function AdminSubstitutes() {
       const [leavesRes, subsRes, facultyRes, ttRes] = await Promise.all([
         supabase.from('faculty_leaves').select('*, faculty!faculty_leaves_faculty_id_fkey(id, name, faculty_id, section)').eq('status', 'approved').gte('end_date', filterDate).lte('start_date', filterDate),
         supabase.from('substitute_allocations').select('*, original:faculty!substitute_allocations_original_faculty_id_fkey(name, faculty_id), substitute:faculty!substitute_allocations_substitute_faculty_id_fkey(name, faculty_id)').eq('date', filterDate),
-        supabase.from('faculty').select('id, name, faculty_id, section, current_subjects'),
+        supabase.from('faculty').select('id, name, faculty_id, section, sections, current_subjects'),
         supabase.from('timetable').select('*'),
       ]);
       setLeaves(leavesRes.data || []);
@@ -47,13 +47,30 @@ export default function AdminSubstitutes() {
     return timetable.filter(t => t.faculty_id === leave.faculty?.id && t.day_of_week === dayOfWeek);
   };
 
-  const getAvailableFaculty = (hour: number, section: string) => {
+  const getRankedFaculty = (hour: number, section: string, subject: string) => {
     const dayOfWeek = new Date(filterDate).getDay();
     const busyFacultyIds = timetable.filter(t => t.day_of_week === dayOfWeek && t.hour_number === hour).map(t => t.faculty_id);
     const onLeaveFacultyIds = leaves.map(l => l.faculty?.id).filter(Boolean);
     const alreadyAssigned = substitutes.filter(s => s.hour_number === hour && s.date === filterDate).map(s => s.substitute_faculty_id);
-    return allFaculty.filter(f => !busyFacultyIds.includes(f.id) && !onLeaveFacultyIds.includes(f.id) && !alreadyAssigned.includes(f.id));
+    const available = allFaculty.filter(f => !busyFacultyIds.includes(f.id) && !onLeaveFacultyIds.includes(f.id) && !alreadyAssigned.includes(f.id));
+
+    // Score: subject match (+50), section match (+20), workload penalty (-hours), past sub count penalty (-3 each)
+    return available.map(f => {
+      const workload = timetable.filter(t => t.faculty_id === f.id && t.day_of_week === dayOfWeek).length;
+      const pastSubs = substitutes.filter(s => s.substitute_faculty_id === f.id).length;
+      const subjectMatch = (f.current_subjects || []).some((s: string) => s?.toLowerCase() === subject?.toLowerCase());
+      const sectionMatch = f.section === section || (f.sections || []).includes(section);
+      const score = (subjectMatch ? 50 : 0) + (sectionMatch ? 20 : 0) - workload * 2 - pastSubs * 3;
+      const reasons: string[] = [];
+      if (subjectMatch) reasons.push('Teaches ' + subject);
+      if (sectionMatch) reasons.push('Handles ' + section);
+      reasons.push(`Load ${workload}h`);
+      if (pastSubs) reasons.push(`${pastSubs} recent subs`);
+      return { ...f, score, workload, pastSubs, subjectMatch, sectionMatch, reasons };
+    }).sort((a, b) => b.score - a.score);
   };
+
+  const getAvailableFaculty = (hour: number, section: string) => getRankedFaculty(hour, section, '');
 
   const assignSubstitute = async () => {
     if (!selectedSub || !assignDialog) return;
@@ -231,12 +248,38 @@ export default function AdminSubstitutes() {
                   <div><span className="text-muted-foreground">Subject:</span> {assignDialog.subject}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Available Faculty</label>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <span className="text-primary">✨ Smart Suggestions</span>
+                    <span className="text-xs text-muted-foreground font-normal">Ranked by subject fit, section, workload, past subs</span>
+                  </label>
+                  <div className="space-y-2 mb-3">
+                    {getRankedFaculty(assignDialog.hour, assignDialog.section, assignDialog.subject).slice(0, 3).map((f: any, idx: number) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setSelectedSub(f.id)}
+                        className={`w-full text-left rounded-lg border p-3 transition-all ${selectedSub === f.id ? 'border-primary bg-primary/10' : 'border-border/60 bg-card/40 hover:border-primary/50'}`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={idx === 0 ? 'bg-success/20 text-success border-success/40' : 'bg-muted/40'}>
+                              #{idx + 1} {idx === 0 && '· Best fit'}
+                            </Badge>
+                            <span className="font-medium text-sm">{f.name}</span>
+                            <span className="text-xs text-muted-foreground">{f.faculty_id}</span>
+                          </div>
+                          <span className="text-xs font-bold text-primary">score {f.score}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">{f.reasons.join(' · ')}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <label className="text-xs font-medium mb-2 block text-muted-foreground">Or pick from all available</label>
                   <Select value={selectedSub} onValueChange={setSelectedSub}>
                     <SelectTrigger><SelectValue placeholder="Select substitute" /></SelectTrigger>
                     <SelectContent>
-                      {getAvailableFaculty(assignDialog.hour, assignDialog.section).map(f => (
-                        <SelectItem key={f.id} value={f.id}>{f.name} ({f.faculty_id})</SelectItem>
+                      {getRankedFaculty(assignDialog.hour, assignDialog.section, assignDialog.subject).map((f: any) => (
+                        <SelectItem key={f.id} value={f.id}>{f.name} ({f.faculty_id}) · score {f.score}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
