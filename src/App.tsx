@@ -56,10 +56,6 @@ import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
 import AdminFacultyLeaves from "@/pages/admin/AdminFacultyLeaves";
 
-// COE Pages
-import COEDashboard from "@/pages/coe/COEDashboard";
-import COEUpload from "@/pages/coe/COEUpload";
-import COEPublished from "@/pages/coe/COEPublished";
 
 // Auth Pages
 import ForgotPassword from "@/pages/auth/ForgotPassword";
