@@ -51,8 +51,8 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
 
   const role: UserRole = faculty.is_tutor ? 'TUTOR' : 'FACULTY';
 
-  // Upsert role into user_roles so getCurrentUser() can find it
-  await supabase
+  // Fire-and-forget role upsert — don't block login on it
+  void supabase
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role }, { onConflict: 'user_id' });
 
@@ -96,8 +96,8 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     throw new Error('Student record not found. Please contact admin.');
   }
 
-  // Upsert role for students
-  await supabase
+  // Fire-and-forget role upsert — don't block login on it
+  void supabase
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role: 'STUDENT' as any }, { onConflict: 'user_id' });
 
@@ -109,6 +109,7 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     studentId: student.id,
   };
 }
+
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
