@@ -10,8 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trophy, Award, Download } from 'lucide-react';
+import { Plus, Trophy, Award, Download, FileText, Sparkles } from 'lucide-react';
 import { downloadCSV } from '@/lib/csvExport';
+import { generatePortfolioPDF } from '@/lib/pdfReports';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
 
 export default function StudentAchievements() {
   const { user } = useAuth();
@@ -62,6 +65,39 @@ export default function StudentAchievements() {
       Verified: a.verified ? 'Yes' : 'No',
     })), 'my-achievements');
   };
+
+  const handlePortfolioPDF = async () => {
+    // Fetch student info + latest CGPA + activities in parallel
+    const [{ data: s }, { data: cg }, { data: acts }] = await Promise.all([
+      supabase.from('students').select('name, roll_number, register_number, section, year').eq('id', user!.studentId!).single(),
+      supabase.from('academic_records').select('cgpa').eq('student_id', user!.studentId!).order('semester', { ascending: false }).limit(1),
+      supabase.from('student_activities').select('title, category, event_date, status').eq('student_id', user!.studentId!).order('event_date', { ascending: false }),
+    ]);
+    if (!s) { toast({ title: 'Could not load profile', variant: 'destructive' }); return; }
+    generatePortfolioPDF({
+      studentName: s.name,
+      rollNumber: s.roll_number,
+      registerNumber: s.register_number,
+      section: s.section,
+      year: s.year,
+      email: user?.email,
+      cgpa: cg?.[0]?.cgpa ?? null,
+      achievements: achievements.map(a => ({
+        title: a.title, category: a.category, date: a.date, description: a.description, verified: !!a.verified,
+      })),
+      activities: (acts || []) as any,
+    });
+    toast({ title: '📄 Portfolio ready', description: 'Your resume-style PDF is downloading.' });
+  };
+
+  // Group achievements by year (from student admission → now) for timeline
+  const timelineGroups = achievements.reduce((acc: Record<string, any[]>, a) => {
+    const yr = new Date(a.date).getFullYear().toString();
+    (acc[yr] = acc[yr] || []).push(a);
+    return acc;
+  }, {});
+  const timelineYears = Object.keys(timelineGroups).sort();
+
 
   const categoryIcons: Record<string, string> = { academic: '📚', sports: '🏆', cultural: '🎭', technical: '💻', other: '⭐' };
   const categoryColors: Record<string, string> = {
