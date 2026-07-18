@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity, Shield, Sparkles,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity, Shield, Sparkles, Target, Compass,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,9 @@ const navItems = [
   { icon: Activity, label: 'Activities', path: '/student/activities' },
   { icon: Mail, label: 'Messages', path: '/student/messages' },
   { icon: Sparkles, label: 'AI Doubt Assistant', path: '/student/doubt-assistant' },
+  { icon: Target, label: 'Attendance Predictor', path: '/student/attendance-predictor' },
+  { icon: FileText, label: 'Auto Resume', path: '/student/resume' },
+  { icon: Compass, label: 'Career Path', path: '/student/career-path' },
   { icon: Shield, label: 'Complaint Box', path: '/student/complaint-box' },
 ];
 

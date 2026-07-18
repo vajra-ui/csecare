@@ -86,6 +86,10 @@ import StudentComplaintBox from "@/pages/student/StudentComplaintBox";
 import StudentDoubtAssistant from "@/pages/student/StudentDoubtAssistant";
 import TutorComplaints from "@/pages/faculty/TutorComplaints";
 import TutorStudyBuddies from "@/pages/faculty/TutorStudyBuddies";
+import StudentAttendancePredictor from "@/pages/student/StudentAttendancePredictor";
+import StudentResume from "@/pages/student/StudentResume";
+import StudentCareerPath from "@/pages/student/StudentCareerPath";
+import AdminPlacementWarRoom from "@/pages/admin/AdminPlacementWarRoom";
 
 const queryClient = new QueryClient();
 
@@ -175,6 +179,10 @@ function AppRoutes() {
       <Route path="/student/activities" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentActivities /></ProtectedRoute>} />
       <Route path="/student/complaint-box" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentComplaintBox /></ProtectedRoute>} />
       <Route path="/student/doubt-assistant" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentDoubtAssistant /></ProtectedRoute>} />
+      <Route path="/student/attendance-predictor" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentAttendancePredictor /></ProtectedRoute>} />
+      <Route path="/student/resume" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentResume /></ProtectedRoute>} />
+      <Route path="/student/career-path" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentCareerPath /></ProtectedRoute>} />
+      <Route path="/admin/placements" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPlacementWarRoom /></ProtectedRoute>} />
       
       {/* COE Routes */}
       <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />
