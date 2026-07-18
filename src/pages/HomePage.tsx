@@ -99,6 +99,9 @@ export default function HomePage() {
         </svg>
       </header>
 
+      {/* Live Tech News Ticker */}
+      <TechNewsBar />
+
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 -mt-4 relative z-10">
         <div className="grid lg:grid-cols-3 gap-8">
