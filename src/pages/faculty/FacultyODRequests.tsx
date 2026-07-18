@@ -22,9 +22,11 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { pushNotification, warmMessages } from '@/lib/notifyWarm';
 
 interface ODRequest {
   id: string;
+  student_id: string;
   reason: string;
   start_date: string;
   end_date: string;
@@ -36,6 +38,7 @@ interface ODRequest {
     name: string;
     roll_number: string;
     section: string;
+    user_id: string | null;
   };
 }
 
@@ -65,7 +68,7 @@ export default function FacultyODRequests() {
         .from('od_requests')
         .select(`
           *,
-          student:students(name, roll_number, section)
+          student:students(name, roll_number, section, user_id)
         `)
         .order('created_at', { ascending: false });
 
@@ -100,6 +103,13 @@ export default function FacultyODRequests() {
         .eq('id', selectedRequest.id);
 
       if (error) throw error;
+
+      if (selectedRequest.student?.user_id) {
+        const msg = approve
+          ? { title: '✅ OD forwarded to admin', message: `Nice, ${selectedRequest.student.name.split(' ')[0]} — your tutor cleared your OD. Waiting on admin approval.` }
+          : warmMessages.odRejected(remarks || undefined);
+        await pushNotification({ userId: selectedRequest.student.user_id, ...msg, link: '/student/od' });
+      }
 
       toast({
         title: approve ? 'OD Request Verified' : 'OD Request Rejected',

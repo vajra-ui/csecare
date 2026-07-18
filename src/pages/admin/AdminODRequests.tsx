@@ -29,9 +29,11 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { pushNotification, warmMessages } from '@/lib/notifyWarm';
 
 interface ODRequest {
   id: string;
+  student_id: string;
   reason: string;
   start_date: string;
   end_date: string;
@@ -44,6 +46,7 @@ interface ODRequest {
     name: string;
     roll_number: string;
     section: string;
+    user_id: string | null;
   };
 }
 
@@ -74,7 +77,7 @@ export default function AdminODRequests() {
         .from('od_requests')
         .select(`
           *,
-          student:students(name, roll_number, section)
+          student:students(name, roll_number, section, user_id)
         `)
         .order('created_at', { ascending: false });
 
@@ -112,6 +115,13 @@ export default function AdminODRequests() {
         .eq('id', selectedRequest.id);
 
       if (error) throw error;
+
+      if (selectedRequest.student?.user_id && action !== 'complete') {
+        const msg = action === 'approve'
+          ? warmMessages.odApproved(selectedRequest.student.name)
+          : warmMessages.odRejected(remarks || undefined);
+        await pushNotification({ userId: selectedRequest.student.user_id, ...msg, link: '/student/od' });
+      }
 
       toast({
         title: `OD Request ${action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Completed'}`,
