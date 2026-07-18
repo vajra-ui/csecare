@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ShieldCheck, GraduationCap, Users, Crown, BookOpen, Building2, Sparkles, ArrowRight, Cpu } from 'lucide-react';
+import { ShieldCheck, GraduationCap, Users, BookOpen, Sparkles, ArrowRight, Cpu } from 'lucide-react';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
