@@ -80,7 +80,7 @@ export default function HomePage() {
                 <Cpu className="h-4 w-4 text-neon-cyan" />
                 <span className="text-neon-cyan font-body text-xs tracking-[0.3em] uppercase">CSE Department</span>
               </div>
-              <h1 className="font-display text-3xl md:text-5xl lg:text-6xl font-black text-primary-foreground tracking-[0.15em] uppercase drop-shadow-[0_0_25px_hsl(var(--neon-cyan)/0.5)]">
+              <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-primary-foreground tracking-wide uppercase">
                 PAAVAI ENGINEERING COLLEGE
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/80 font-body font-light uppercase tracking-widest">
