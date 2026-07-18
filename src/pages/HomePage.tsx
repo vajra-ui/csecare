@@ -61,7 +61,7 @@ export default function HomePage() {
               <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-primary-foreground tracking-wide uppercase">
                 PAAVAI ENGINEERING COLLEGE
               </h1>
-              <p className="text-lg md:text-xl text-primary-foreground/80 font-body font-light uppercase tracking-widest">
+              <p className="text-sm md:text-base lg:text-lg text-primary-foreground/80 font-body font-medium uppercase tracking-[0.25em]">
                 Academic Management System
               </p>
               <p className="text-xs text-primary-foreground/60 font-body tracking-[0.2em] uppercase">
