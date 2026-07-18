@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ShieldCheck, GraduationCap, Users, Crown, BookOpen, Building2, Sparkles, ArrowRight, Cpu } from 'lucide-react';
+import { ShieldCheck, GraduationCap, Users, BookOpen, Sparkles, ArrowRight, Cpu } from 'lucide-react';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { RoleCard } from '@/components/RoleCard';
 import { AnnouncementPanel } from '@/components/AnnouncementPanel';
@@ -86,26 +86,12 @@ export default function HomePage() {
                 <div className="h-8 w-1 rounded-full bg-gradient-to-b from-neon-cyan to-neon-purple" />
                 <h2 className="font-display text-xl font-semibold tracking-wider">Administration</h2>
               </div>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <RoleCard
-                  icon={<Crown className="h-7 w-7" />}
-                  title="Principal"
-                  description="Institutional oversight & governance"
-                  onClick={() => handleAdminLogin('Principal')}
-                  variant="admin"
-                />
+              <div className="grid sm:grid-cols-1 gap-4">
                 <RoleCard
                   icon={<BookOpen className="h-7 w-7" />}
                   title="HOD"
                   description="Head of CSE Department"
                   onClick={() => handleAdminLogin('HOD')}
-                  variant="admin"
-                />
-                <RoleCard
-                  icon={<Building2 className="h-7 w-7" />}
-                  title="COE Cell"
-                  description="Controller of Examinations"
-                  onClick={() => handleAdminLogin('COE Cell')}
                   variant="admin"
                 />
               </div>

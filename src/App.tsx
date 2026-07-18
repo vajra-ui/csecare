@@ -56,10 +56,6 @@ import AdminSubstitutes from "@/pages/admin/AdminSubstitutes";
 import AdminAbsenceReports from "@/pages/admin/AdminAbsenceReports";
 import AdminFacultyLeaves from "@/pages/admin/AdminFacultyLeaves";
 
-// COE Pages
-import COEDashboard from "@/pages/coe/COEDashboard";
-import COEUpload from "@/pages/coe/COEUpload";
-import COEPublished from "@/pages/coe/COEPublished";
 
 // Auth Pages
 import ForgotPassword from "@/pages/auth/ForgotPassword";
@@ -203,11 +199,8 @@ function AppRoutes() {
       <Route path="/student/qr-scan" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentQRScan /></ProtectedRoute>} />
       <Route path="/student/mentorship" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMentorship /></ProtectedRoute>} />
       <Route path="/alumni/inbox" element={<ProtectedRoute allowedRoles={['ADMIN','FACULTY','TUTOR','STUDENT']}><AlumniMentorshipInbox /></ProtectedRoute>} />
-      
-      {/* COE Routes */}
-      <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />
-      <Route path="/coe/upload" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEUpload /></ProtectedRoute>} />
-      <Route path="/coe/published" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEPublished /></ProtectedRoute>} />
+
+
       
       <Route path="*" element={<NotFound />} />
     </Routes>
