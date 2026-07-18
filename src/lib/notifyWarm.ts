@@ -12,9 +12,43 @@ type NotifyArgs = {
   message: string;
   type?: string;
   link?: string;
+  /**
+   * Stable per-event key (e.g. `od:<requestId>:tutor:approve`). When provided,
+   * the same event will never fire more than one notification per user, even
+   * across double-clicks, remounts, or re-runs within a session.
+   */
+  dedupeKey?: string;
 };
 
+// In-memory guard for the current browser session (handles double-click / rapid retries).
+const sentKeys = new Set<string>();
+
 export async function pushNotification(args: NotifyArgs) {
+  if (args.dedupeKey) {
+    const key = `${args.userId}::${args.dedupeKey}`;
+    if (sentKeys.has(key)) {
+      return { data: null, error: null, skipped: true } as const;
+    }
+    sentKeys.add(key);
+
+    // Persistent guard: if an identical notification already exists for this
+    // user + link within the last 10 minutes, skip inserting a duplicate.
+    if (args.link) {
+      const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('user_id', args.userId)
+        .eq('title', args.title)
+        .eq('link', args.link)
+        .gte('created_at', tenMinAgo)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        return { data: null, error: null, skipped: true } as const;
+      }
+    }
+  }
+
   return supabase.from('notifications').insert({
     user_id: args.userId,
     title: args.title,
