@@ -57,9 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         setSession(session);
         if (session?.user) {
-          // ✅ FIX: No setTimeout — await directly so role is set before anything navigates
           await refreshUser();
           setLoading(false);
+          // Warm welcome only on a fresh sign-in — not on tab refreshes/token refresh.
+          if (event === 'SIGNED_IN') {
+            const key = `welcomed:${session.user.id}:${session.access_token.slice(-12)}`;
+            if (!sessionStorage.getItem(key)) {
+              sessionStorage.setItem(key, '1');
+              const currentUser = await getCurrentUser();
+              fireWelcomeToast(currentUser?.name);
+            }
+          }
         } else {
           setUser(null);
           setLoading(false);
