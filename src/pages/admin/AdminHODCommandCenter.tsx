@@ -15,6 +15,9 @@ import {
   PieChart as RPieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, LineChart, Line,
 } from 'recharts';
+import AnomalyRadar from '@/components/admin/AnomalyRadar';
+import FacultyLoadBalancer from '@/components/admin/FacultyLoadBalancer';
+import GradeLedgerCard from '@/components/GradeLedgerCard';
 
 const NEON_COLORS = [
   'hsl(185, 100%, 50%)',
