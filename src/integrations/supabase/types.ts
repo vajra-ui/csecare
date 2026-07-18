@@ -513,46 +513,70 @@ export type Database = {
       }
       faculty: {
         Row: {
+          address: string | null
+          bio: string | null
           created_at: string
           current_subjects: string[] | null
           dob: string
           faculty_id: string
           id: string
           is_tutor: boolean | null
+          linkedin_url: string | null
           name: string
+          personal_email: string | null
+          phone: string | null
+          profile_photo_url: string | null
           qualification: string | null
+          research_interests: string[] | null
           section: Database["public"]["Enums"]["section_type"] | null
           sections: string[] | null
+          specialization: string | null
           updated_at: string
           user_id: string | null
           years_of_experience: number | null
         }
         Insert: {
+          address?: string | null
+          bio?: string | null
           created_at?: string
           current_subjects?: string[] | null
           dob: string
           faculty_id: string
           id?: string
           is_tutor?: boolean | null
+          linkedin_url?: string | null
           name: string
+          personal_email?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
           qualification?: string | null
+          research_interests?: string[] | null
           section?: Database["public"]["Enums"]["section_type"] | null
           sections?: string[] | null
+          specialization?: string | null
           updated_at?: string
           user_id?: string | null
           years_of_experience?: number | null
         }
         Update: {
+          address?: string | null
+          bio?: string | null
           created_at?: string
           current_subjects?: string[] | null
           dob?: string
           faculty_id?: string
           id?: string
           is_tutor?: boolean | null
+          linkedin_url?: string | null
           name?: string
+          personal_email?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
           qualification?: string | null
+          research_interests?: string[] | null
           section?: Database["public"]["Enums"]["section_type"] | null
           sections?: string[] | null
+          specialization?: string | null
           updated_at?: string
           user_id?: string | null
           years_of_experience?: number | null
@@ -1472,15 +1496,26 @@ export type Database = {
       }
       students: {
         Row: {
+          address: string | null
           admission_year: number | null
+          bio: string | null
+          blood_group: string | null
           created_at: string
           dob: string
+          github_url: string | null
           id: string
+          interests: string[] | null
+          linkedin_url: string | null
           name: string
+          parent_name: string | null
+          parent_phone: string | null
+          personal_email: string | null
+          phone: string | null
           profile_photo_url: string | null
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
+          skills: string[] | null
           status: string
           tutor_id: string | null
           updated_at: string
@@ -1488,15 +1523,26 @@ export type Database = {
           year: Database["public"]["Enums"]["year_type"]
         }
         Insert: {
+          address?: string | null
           admission_year?: number | null
+          bio?: string | null
+          blood_group?: string | null
           created_at?: string
           dob: string
+          github_url?: string | null
           id?: string
+          interests?: string[] | null
+          linkedin_url?: string | null
           name: string
+          parent_name?: string | null
+          parent_phone?: string | null
+          personal_email?: string | null
+          phone?: string | null
           profile_photo_url?: string | null
           register_number: string
           roll_number: string
           section: Database["public"]["Enums"]["section_type"]
+          skills?: string[] | null
           status?: string
           tutor_id?: string | null
           updated_at?: string
@@ -1504,15 +1550,26 @@ export type Database = {
           year: Database["public"]["Enums"]["year_type"]
         }
         Update: {
+          address?: string | null
           admission_year?: number | null
+          bio?: string | null
+          blood_group?: string | null
           created_at?: string
           dob?: string
+          github_url?: string | null
           id?: string
+          interests?: string[] | null
+          linkedin_url?: string | null
           name?: string
+          parent_name?: string | null
+          parent_phone?: string | null
+          personal_email?: string | null
+          phone?: string | null
           profile_photo_url?: string | null
           register_number?: string
           roll_number?: string
           section?: Database["public"]["Enums"]["section_type"]
+          skills?: string[] | null
           status?: string
           tutor_id?: string | null
           updated_at?: string
