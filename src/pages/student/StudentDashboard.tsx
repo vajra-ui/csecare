@@ -123,6 +123,36 @@ export default function StudentDashboard() {
           </div>
         )}
 
+        {/* Smart Attendance Prediction — proactive hint */}
+        {attendancePercentage !== null && attendancePercentage >= 75 && attendancePercentage < 82 && (
+          <div className="futuristic-card p-4 flex items-center gap-4 animate-slide-up border-warning/40">
+            <div className="p-2.5 rounded-lg bg-warning/10">
+              <Sparkles className="h-6 w-6 text-warning" />
+            </div>
+            <div>
+              <p className="font-display font-semibold text-warning text-sm tracking-wide">Attendance Watch</p>
+              <p className="text-sm text-muted-foreground font-body">
+                You're at <span className="text-warning font-semibold">{attendancePercentage}%</span> — skipping tomorrow could drop you close to 75%.{' '}
+                <span className="text-neon-cyan cursor-pointer underline-offset-2 hover:underline" onClick={() => navigate('/student/attendance-predictor')}>Run the predictor →</span>
+              </p>
+            </div>
+          </div>
+        )}
+        {attendancePercentage !== null && attendancePercentage >= 90 && (
+          <div className="futuristic-card p-4 flex items-center gap-4 animate-slide-up border-neon-green/40">
+            <div className="p-2.5 rounded-lg bg-neon-green/10">
+              <Sparkles className="h-6 w-6 text-neon-green" />
+            </div>
+            <div>
+              <p className="font-display font-semibold text-neon-green text-sm tracking-wide">🔥 Streak unlocked!</p>
+              <p className="text-sm text-muted-foreground font-body">
+                {attendancePercentage}% attendance — you're crushing it. Keep the streak alive!
+              </p>
+            </div>
+          </div>
+        )}
+
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {/* Stat Cards */}
