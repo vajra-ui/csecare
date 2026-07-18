@@ -110,10 +110,14 @@ export default function StudentAchievements() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl md:text-3xl font-bold">Achievement Portfolio</h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleDownload} disabled={achievements.length === 0}>
-              <Download className="h-4 w-4 mr-1" /> Export
+              <Download className="h-4 w-4 mr-1" /> CSV
             </Button>
+            <Button variant="outline" size="sm" onClick={handlePortfolioPDF} disabled={achievements.length === 0}>
+              <FileText className="h-4 w-4 mr-1" /> Portfolio PDF
+            </Button>
+
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> Add</Button></DialogTrigger>
               <DialogContent>
