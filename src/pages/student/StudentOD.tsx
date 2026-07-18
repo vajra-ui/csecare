@@ -361,6 +361,17 @@ export default function StudentOD() {
                       <p className="text-sm text-muted-foreground mb-1">Reason</p>
                       <p className="text-sm">{request.reason}</p>
                     </div>
+                    {/* Real-time reviewer name */}
+                    {request.status === 'submitted' && (
+                      <p className="text-xs text-info font-medium">
+                        ⏳ Being reviewed by {request.tutor_id ? tutorNames[request.tutor_id] || 'your tutor' : 'your tutor'}…
+                      </p>
+                    )}
+                    {request.status === 'tutor_verified' && (
+                      <p className="text-xs text-info font-medium">
+                        ✓ Verified by {request.tutor_id ? tutorNames[request.tutor_id] || 'your tutor' : 'your tutor'} — awaiting admin approval
+                      </p>
+                    )}
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Status Tracking</p>
                       {renderStatusTracker(request.status)}
@@ -377,7 +388,14 @@ export default function StudentOD() {
                         <p className="text-sm bg-muted p-2 rounded">{request.admin_remarks}</p>
                       </div>
                     )}
+                    {(request.status === 'admin_approved' || request.status === 'completed') && (
+                      <Button size="sm" variant="outline" onClick={() => downloadLetter(request)}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download OD Letter (PDF)
+                      </Button>
+                    )}
                   </CardContent>
+
                 </Card>
               );
             })
