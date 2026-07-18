@@ -1,7 +1,30 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, getCurrentUser, logout as authLogout } from '@/lib/auth';
 import type { Session } from '@supabase/supabase-js';
+
+const WELCOME_QUOTES = [
+  'Code is poetry written in logic. ✨',
+  'Every expert was once a beginner. Keep pushing. 🚀',
+  'The best way to predict the future is to build it. 💡',
+  'Small steps every day beat big leaps once a year. 🔥',
+  'Your consistency is your superpower. 💪',
+  'Learn. Build. Repeat. That is the algorithm. ⚡',
+  'Great things take time — you are right on schedule. 🌱',
+  'Curiosity today, breakthroughs tomorrow. 🧠',
+  'Debug the code, not your self-worth. 💙',
+  'One commit at a time — you are shaping the future. 🌟',
+];
+
+function fireWelcomeToast(name?: string | null) {
+  const quote = WELCOME_QUOTES[Math.floor(Math.random() * WELCOME_QUOTES.length)];
+  const firstName = (name || '').split(' ')[0] || 'there';
+  toast(`Hello ${firstName} 👋`, {
+    description: quote,
+    duration: 6000,
+  });
+}
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -34,9 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         setSession(session);
         if (session?.user) {
-          // ✅ FIX: No setTimeout — await directly so role is set before anything navigates
           await refreshUser();
           setLoading(false);
+          // Warm welcome only on a fresh sign-in — not on tab refreshes/token refresh.
+          if (event === 'SIGNED_IN') {
+            const key = `welcomed:${session.user.id}:${session.access_token.slice(-12)}`;
+            if (!sessionStorage.getItem(key)) {
+              sessionStorage.setItem(key, '1');
+              const currentUser = await getCurrentUser();
+              fireWelcomeToast(currentUser?.name);
+            }
+          }
         } else {
           setUser(null);
           setLoading(false);
