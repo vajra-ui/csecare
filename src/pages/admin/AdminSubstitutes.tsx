@@ -31,7 +31,7 @@ export default function AdminSubstitutes() {
       const [leavesRes, subsRes, facultyRes, ttRes] = await Promise.all([
         supabase.from('faculty_leaves').select('*, faculty!faculty_leaves_faculty_id_fkey(id, name, faculty_id, section)').eq('status', 'approved').gte('end_date', filterDate).lte('start_date', filterDate),
         supabase.from('substitute_allocations').select('*, original:faculty!substitute_allocations_original_faculty_id_fkey(name, faculty_id), substitute:faculty!substitute_allocations_substitute_faculty_id_fkey(name, faculty_id)').eq('date', filterDate),
-        supabase.from('faculty').select('id, name, faculty_id, section, current_subjects'),
+        supabase.from('faculty').select('id, name, faculty_id, section, sections, current_subjects'),
         supabase.from('timetable').select('*'),
       ]);
       setLeaves(leavesRes.data || []);
