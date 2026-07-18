@@ -31,6 +31,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: User, label: 'Profile', path: '/faculty/profile' },
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
+    { icon: QrCode, label: 'QR Beacon', path: '/faculty/qr-attendance' },
     { icon: BookOpen, label: 'Assignments', path: '/faculty/assignments' },
     { icon: PenLine, label: 'Internal Marks', path: '/faculty/marks' },
     { icon: FileUp, label: 'Class Notes', path: '/faculty/notes' },
