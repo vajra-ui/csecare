@@ -68,7 +68,7 @@ export default function FacultyODRequests() {
         .from('od_requests')
         .select(`
           *,
-          student:students(name, roll_number, section)
+          student:students(name, roll_number, section, user_id)
         `)
         .order('created_at', { ascending: false });
 
