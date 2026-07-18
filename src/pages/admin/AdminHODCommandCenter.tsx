@@ -651,6 +651,16 @@ export default function AdminHODCommandCenter() {
               </Card>
             )}
           </TabsContent>
+
+          <TabsContent value="radar" className="space-y-4">
+            <AnomalyRadar />
+          </TabsContent>
+          <TabsContent value="load" className="space-y-4">
+            <FacultyLoadBalancer />
+          </TabsContent>
+          <TabsContent value="ledger" className="space-y-4">
+            <GradeLedgerCard limit={50} />
+          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>
