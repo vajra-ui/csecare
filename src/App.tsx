@@ -90,6 +90,10 @@ import StudentAttendancePredictor from "@/pages/student/StudentAttendancePredict
 import StudentResume from "@/pages/student/StudentResume";
 import StudentCareerPath from "@/pages/student/StudentCareerPath";
 import AdminPlacementWarRoom from "@/pages/admin/AdminPlacementWarRoom";
+import FacultyQRAttendance from "@/pages/faculty/FacultyQRAttendance";
+import StudentQRScan from "@/pages/student/StudentQRScan";
+import StudentMentorship from "@/pages/student/StudentMentorship";
+import AlumniMentorshipInbox from "@/pages/alumni/AlumniMentorshipInbox";
 
 const queryClient = new QueryClient();
 
