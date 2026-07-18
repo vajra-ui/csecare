@@ -33,6 +33,7 @@ import { pushNotification, warmMessages } from '@/lib/notifyWarm';
 
 interface ODRequest {
   id: string;
+  student_id: string;
   reason: string;
   start_date: string;
   end_date: string;
@@ -45,6 +46,7 @@ interface ODRequest {
     name: string;
     roll_number: string;
     section: string;
+    user_id: string | null;
   };
 }
 
