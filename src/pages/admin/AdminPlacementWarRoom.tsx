@@ -24,7 +24,7 @@ interface Placement {
   offer_date: string;
   status: string;
   notes: string | null;
-  students?: { full_name: string; register_number: string; section: string };
+  students?: { name: string; register_number: string; section: string };
 }
 
 const STATUSES = ['OFFERED', 'ACCEPTED', 'DECLINED', 'JOINED'];
@@ -38,9 +38,9 @@ export default function AdminPlacementWarRoom() {
   const [form, setForm] = useState({ student_id: '', company: '', role: '', package_lpa: '', offer_type: 'FULL_TIME', status: 'OFFERED', offer_date: new Date().toISOString().slice(0, 10), notes: '' });
 
   const load = async () => {
-    const { data } = await supabase.from('placements').select('*, students(full_name, register_number, section)').order('offer_date', { ascending: false });
+    const { data } = await supabase.from('placements').select('*, students(name, register_number, section)').order('offer_date', { ascending: false });
     setPlacements((data as any) || []);
-    const { data: st } = await supabase.from('students').select('id, full_name, register_number, section').order('full_name');
+    const { data: st } = await supabase.from('students').select('id, name, register_number, section').order('name');
     setStudents(st || []);
   };
   useEffect(() => { load(); }, []);
@@ -98,7 +98,7 @@ export default function AdminPlacementWarRoom() {
                 <div><Label>Student</Label>
                   <Select value={form.student_id} onValueChange={(v) => setForm({ ...form, student_id: v })}>
                     <SelectTrigger><SelectValue placeholder="Select student" /></SelectTrigger>
-                    <SelectContent>{students.map((s) => <SelectItem key={s.id} value={s.id}>{s.full_name} ({s.register_number}) - {s.section}</SelectItem>)}</SelectContent>
+                    <SelectContent>{students.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.register_number}) - {s.section}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -155,7 +155,7 @@ export default function AdminPlacementWarRoom() {
                 <TableBody>
                   {placements.map((p) => (
                     <TableRow key={p.id}>
-                      <TableCell>{p.students?.full_name} <span className="text-xs text-muted-foreground">{p.students?.register_number}</span></TableCell>
+                      <TableCell>{p.students?.name} <span className="text-xs text-muted-foreground">{p.students?.register_number}</span></TableCell>
                       <TableCell className="font-medium">{p.company}</TableCell>
                       <TableCell>{p.role || '-'}</TableCell>
                       <TableCell>{p.package_lpa ?? '-'}</TableCell>

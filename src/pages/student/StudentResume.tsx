@@ -53,11 +53,11 @@ export default function StudentResume() {
         <Card className="print:shadow-none print:border-none">
           <CardContent className="p-8 space-y-6" id="resume-body">
             <header className="border-b pb-4">
-              <h2 className="text-3xl font-bold">{profile.full_name}</h2>
+              <h2 className="text-3xl font-bold">{profile.name}</h2>
               <p className="text-sm text-muted-foreground">
                 {profile.register_number} · CSE · Year {profile.year} · Section {profile.section}
               </p>
-              <p className="text-sm">{profile.email} · {profile.phone || ''}</p>
+              <p className="text-sm">{""} · {"" || ''}</p>
             </header>
 
             <section>
@@ -72,7 +72,7 @@ export default function StudentResume() {
               <h3 className="text-lg font-semibold mb-2">Education</h3>
               <div className="text-sm">
                 <div className="font-medium">B.E. Computer Science and Engineering</div>
-                <div>Paavai Engineering College · {profile.batch || ''}</div>
+                <div>Paavai Engineering College · {profile.admission_year || ''}</div>
                 {cgpa && <div>CGPA: <span className="font-semibold">{cgpa.toFixed(2)}</span> / 10</div>}
               </div>
             </section>

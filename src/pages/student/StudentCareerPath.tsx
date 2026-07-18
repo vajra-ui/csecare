@@ -37,7 +37,7 @@ export default function StudentCareerPath() {
         supabase.from('student_activities').select('title, activity_type').eq('student_id', s.id),
       ]);
 
-      const summary = `Name: ${s.full_name}
+      const summary = `Name: ${s.name}
 Year: ${s.year}, Section: ${s.section}
 CGPA history: ${(ar || []).map((r: any) => `Sem${r.semester}:${r.cgpa}`).join(', ') || 'N/A'}
 Subject internals: ${(ss || []).map((r: any) => `${r.subject}:${r.internal_marks}`).join(', ') || 'N/A'}
