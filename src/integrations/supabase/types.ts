@@ -850,6 +850,60 @@ export type Database = {
           },
         ]
       }
+      mentorship_requests: {
+        Row: {
+          alumni_id: string
+          alumni_response: string | null
+          created_at: string
+          id: string
+          message: string
+          responded_at: string | null
+          status: string
+          student_id: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          alumni_id: string
+          alumni_response?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          responded_at?: string | null
+          status?: string
+          student_id: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          alumni_id?: string
+          alumni_response?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          responded_at?: string | null
+          status?: string
+          student_id?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_requests_alumni_id_fkey"
+            columns: ["alumni_id"]
+            isOneToOne: false
+            referencedRelation: "alumni"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -1115,6 +1169,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      qr_attendance_sessions: {
+        Row: {
+          code_rotated_at: string
+          created_at: string
+          current_code: string
+          expires_at: string
+          faculty_id: string
+          hour_number: number
+          id: string
+          is_active: boolean
+          section: Database["public"]["Enums"]["section_type"]
+          session_date: string
+          subject: string
+        }
+        Insert: {
+          code_rotated_at?: string
+          created_at?: string
+          current_code: string
+          expires_at: string
+          faculty_id: string
+          hour_number: number
+          id?: string
+          is_active?: boolean
+          section: Database["public"]["Enums"]["section_type"]
+          session_date?: string
+          subject: string
+        }
+        Update: {
+          code_rotated_at?: string
+          created_at?: string
+          current_code?: string
+          expires_at?: string
+          faculty_id?: string
+          hour_number?: number
+          id?: string
+          is_active?: boolean
+          section?: Database["public"]["Enums"]["section_type"]
+          session_date?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_attendance_sessions_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       results: {
         Row: {
