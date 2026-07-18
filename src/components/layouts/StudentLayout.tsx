@@ -27,6 +27,8 @@ const navItems = [
   { icon: TrendingUp, label: 'Progress', path: '/student/progress' },
   { icon: FileText, label: 'OD Submission', path: '/student/od' },
   { icon: CalendarCheck, label: 'Attendance', path: '/student/attendance' },
+  { icon: ScanLine, label: 'QR Scan', path: '/student/qr-scan' },
+  { icon: GraduationCap, label: 'Mentorship', path: '/student/mentorship' },
   { icon: Trophy, label: 'Achievements', path: '/student/achievements' },
   { icon: Calculator, label: 'GPA Calculator', path: '/student/gpa-calculator' },
   { icon: ClipboardList, label: 'Exam Timetable', path: '/student/exam-timetable' },
