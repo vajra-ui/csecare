@@ -61,7 +61,11 @@ export default function FacultyProfile() {
       if (data) {
         const d = data as any;
         const { data: pii } = await supabase.rpc('get_faculty_pii', { _faculty_id: d.id });
-        const privateDetails = pii?.[0] || {};
+        const privateDetails = (pii?.[0] || {}) as Partial<{
+          phone: string;
+          personal_email: string;
+          address: string;
+        }>;
         setFacultyData(d);
         setForm({
           phone: privateDetails.phone || '',
