@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { studentLogin } from '@/lib/auth';
+import { tryOfflineLogin, isNetworkError } from '@/lib/offlineAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -45,15 +46,31 @@ export function StudentLogin() {
 
   const onSubmit = async (data: StudentLoginForm) => {
     setLoading(true);
+    const offlineFirst = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
+      if (offlineFirst) {
+        const cached = await tryOfflineLogin('STUDENT', data.identifier, data.dob);
+        if (!cached) throw new Error("You're offline and we don't have cached credentials for this account. Connect once online to enable offline login.");
+        await refreshUser();
+        toast({ title: `Welcome back, ${cached.name}!`, description: 'Signed in offline from cached credentials.' });
+        setShowTransition(true);
+        return;
+      }
       const user = await studentLogin(data.identifier, data.dob);
       await refreshUser();
-      toast({
-        title: `Welcome, ${user.name}!`,
-        description: 'You have successfully logged in.',
-      });
+      toast({ title: `Welcome, ${user.name}!`, description: 'You have successfully logged in.' });
       setShowTransition(true);
     } catch (error) {
+      if (isNetworkError(error)) {
+        const cached = await tryOfflineLogin('STUDENT', data.identifier, data.dob);
+        if (cached) {
+          await refreshUser();
+          toast({ title: `Welcome back, ${cached.name}!`, description: 'Network unavailable — signed in offline.' });
+          setShowTransition(true);
+          setLoading(false);
+          return;
+        }
+      }
       toast({
         title: 'Login Failed',
         description: error instanceof Error ? error.message : 'Invalid credentials',
