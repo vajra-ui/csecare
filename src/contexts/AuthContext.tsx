@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, getCurrentUser, logout as authLogout } from '@/lib/auth';
+import { getOfflineUser } from '@/lib/offlineAuth';
 import type { Session } from '@supabase/supabase-js';
 
 const WELCOME_QUOTES = [
@@ -45,12 +46,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async (): Promise<AuthUser | null> => {
     try {
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      return currentUser;
+      if (currentUser) {
+        setUser(currentUser);
+        return currentUser;
+      }
+      // No live session — fall back to a cached offline user if present.
+      const offline = getOfflineUser();
+      setUser(offline);
+      return offline;
     } catch (error) {
       console.error('Error refreshing user:', error);
-      setUser(null);
-      return null;
+      const offline = getOfflineUser();
+      setUser(offline);
+      return offline;
     }
   };
 
