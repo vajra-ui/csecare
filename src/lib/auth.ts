@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { saveCredentialForOffline, clearOfflineCurrent } from "./offlineAuth";
 
 export type UserRole = 'ADMIN' | 'FACULTY' | 'TUTOR' | 'STUDENT';
 
@@ -28,7 +29,9 @@ export async function adminLogin(email: string, password: string): Promise<AuthU
     throw new Error('Unauthorized: Admin access required');
   }
 
-  return { id: data.user.id, email: data.user.email, role: 'ADMIN', name: 'Administrator' };
+  const user: AuthUser = { id: data.user.id, email: data.user.email, role: 'ADMIN', name: 'Administrator' };
+  void saveCredentialForOffline('ADMIN', email, password, user);
+  return user;
 }
 
 export async function facultyLogin(facultyId: string, dob: string): Promise<AuthUser> {
@@ -56,7 +59,7 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role }, { onConflict: 'user_id' });
 
-  return {
+  const user: AuthUser = {
     id: faculty.id,
     email: authData.user.email,
     role,
@@ -64,6 +67,8 @@ export async function facultyLogin(facultyId: string, dob: string): Promise<Auth
     facultyId: faculty.faculty_id,
     isTutor: faculty.is_tutor,
   };
+  void saveCredentialForOffline(role, facultyId, dob, user);
+  return user;
 }
 
 export async function studentLogin(identifier: string, dob: string): Promise<AuthUser> {
@@ -101,13 +106,15 @@ export async function studentLogin(identifier: string, dob: string): Promise<Aut
     .from('user_roles')
     .upsert({ user_id: authData.user.id, role: 'STUDENT' as any }, { onConflict: 'user_id' });
 
-  return {
+  const user: AuthUser = {
     id: student.id,
     email: authData.user.email,
     role: 'STUDENT',
     name: student.name,
     studentId: student.id,
   };
+  void saveCredentialForOffline('STUDENT', identifier, dob, user);
+  return user;
 }
 
 
@@ -157,6 +164,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
 
 export async function logout(): Promise<void> {
+  clearOfflineCurrent();
   await supabase.auth.signOut();
 }
 
