@@ -116,6 +116,13 @@ export default function AdminODRequests() {
 
       if (error) throw error;
 
+      if (selectedRequest.student?.user_id && action !== 'complete') {
+        const msg = action === 'approve'
+          ? warmMessages.odApproved(selectedRequest.student.name)
+          : warmMessages.odRejected(remarks || undefined);
+        await pushNotification({ userId: selectedRequest.student.user_id, ...msg, link: '/student/od' });
+      }
+
       toast({
         title: `OD Request ${action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Completed'}`,
         description: `Request has been ${action}ed successfully.`,
