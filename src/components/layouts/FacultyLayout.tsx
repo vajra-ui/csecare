@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare, Mail, Trophy, CalendarClock, Megaphone, AlertTriangle, BarChart3, Shield, Sparkles,
+  LayoutDashboard, Calendar, ClipboardCheck, Users, FileText, LogOut, User, Moon, Sun, BookOpen, PenLine, FileUp, CalendarOff, Phone, MessageSquare, Mail, Trophy, CalendarClock, Megaphone, AlertTriangle, BarChart3, Shield, Sparkles, QrCode,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export function FacultyLayout({ children }: FacultyLayoutProps) {
     { icon: User, label: 'Profile', path: '/faculty/profile' },
     { icon: Calendar, label: 'Timetable', path: '/faculty/timetable' },
     { icon: ClipboardCheck, label: 'Attendance', path: '/faculty/attendance' },
+    { icon: QrCode, label: 'QR Beacon', path: '/faculty/qr-attendance' },
     { icon: BookOpen, label: 'Assignments', path: '/faculty/assignments' },
     { icon: PenLine, label: 'Internal Marks', path: '/faculty/marks' },
     { icon: FileUp, label: 'Class Notes', path: '/faculty/notes' },

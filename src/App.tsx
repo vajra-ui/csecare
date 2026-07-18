@@ -90,6 +90,10 @@ import StudentAttendancePredictor from "@/pages/student/StudentAttendancePredict
 import StudentResume from "@/pages/student/StudentResume";
 import StudentCareerPath from "@/pages/student/StudentCareerPath";
 import AdminPlacementWarRoom from "@/pages/admin/AdminPlacementWarRoom";
+import FacultyQRAttendance from "@/pages/faculty/FacultyQRAttendance";
+import StudentQRScan from "@/pages/student/StudentQRScan";
+import StudentMentorship from "@/pages/student/StudentMentorship";
+import AlumniMentorshipInbox from "@/pages/alumni/AlumniMentorshipInbox";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +187,12 @@ function AppRoutes() {
       <Route path="/student/resume" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentResume /></ProtectedRoute>} />
       <Route path="/student/career-path" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentCareerPath /></ProtectedRoute>} />
       <Route path="/admin/placements" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPlacementWarRoom /></ProtectedRoute>} />
+
+      {/* Phase 4 — QR Beacon & Mentorship */}
+      <Route path="/faculty/qr-attendance" element={<ProtectedRoute allowedRoles={['FACULTY', 'TUTOR']}><FacultyQRAttendance /></ProtectedRoute>} />
+      <Route path="/student/qr-scan" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentQRScan /></ProtectedRoute>} />
+      <Route path="/student/mentorship" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentMentorship /></ProtectedRoute>} />
+      <Route path="/alumni/inbox" element={<ProtectedRoute allowedRoles={['ADMIN','FACULTY','TUTOR','STUDENT']}><AlumniMentorshipInbox /></ProtectedRoute>} />
       
       {/* COE Routes */}
       <Route path="/coe" element={<ProtectedRoute allowedRoles={['ADMIN']}><COEDashboard /></ProtectedRoute>} />

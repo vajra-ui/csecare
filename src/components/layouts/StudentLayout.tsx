@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity, Shield, Sparkles, Target, Compass,
+  LayoutDashboard, Upload, TrendingUp, FileText, CalendarCheck, LogOut, User, Calendar, Moon, Sun, BookOpen, Trophy, Calculator, ClipboardList, Star, Mail, Activity, Shield, Sparkles, Target, Compass, ScanLine, GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,8 @@ const navItems = [
   { icon: TrendingUp, label: 'Progress', path: '/student/progress' },
   { icon: FileText, label: 'OD Submission', path: '/student/od' },
   { icon: CalendarCheck, label: 'Attendance', path: '/student/attendance' },
+  { icon: ScanLine, label: 'QR Scan', path: '/student/qr-scan' },
+  { icon: GraduationCap, label: 'Mentorship', path: '/student/mentorship' },
   { icon: Trophy, label: 'Achievements', path: '/student/achievements' },
   { icon: Calculator, label: 'GPA Calculator', path: '/student/gpa-calculator' },
   { icon: ClipboardList, label: 'Exam Timetable', path: '/student/exam-timetable' },
