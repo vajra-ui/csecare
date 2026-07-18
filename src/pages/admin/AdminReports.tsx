@@ -26,7 +26,8 @@ export default function AdminReports() {
           break;
         }
         case 'faculty': {
-          const { data } = await supabase.from('faculty').select('*').order('name');
+          const { data, error } = await (supabase as any).rpc('get_admin_faculty_records');
+          if (error) throw error;
           generateFacultyListPDF(data || []);
           break;
         }

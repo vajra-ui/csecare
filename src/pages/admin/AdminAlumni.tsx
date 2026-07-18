@@ -62,7 +62,12 @@ export default function AdminAlumni() {
   useEffect(() => { fetchAlumni(); }, []);
 
   const fetchAlumni = async () => {
-    const { data } = await supabase.from('alumni').select('*').order('graduation_year', { ascending: false });
+    const { data, error } = await (supabase as any).rpc('get_admin_alumni_records');
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      setLoading(false);
+      return;
+    }
     setAlumni((data as any as Alumni[]) || []);
     setLoading(false);
   };

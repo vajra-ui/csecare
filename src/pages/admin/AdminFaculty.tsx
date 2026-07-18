@@ -66,6 +66,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 const SECTIONS = ['CSE A', 'CSE B', 'CSE C', 'CSE D'] as const;
 
+const fetchAdminFacultyRecords = async () => {
+  const { data, error } = await (supabase as any).rpc('get_admin_faculty_records');
+  if (error) throw error;
+  return data as Faculty[];
+};
+
 const facultySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   dob: z.string().min(1, 'Date of birth is required'),
@@ -128,12 +134,7 @@ export default function AdminFaculty() {
 
   const fetchFaculty = async () => {
     try {
-      const { data, error } = await supabase
-        .from('faculty')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchAdminFacultyRecords();
       setFaculty(data || []);
     } catch (error) {
       console.error('Error fetching faculty:', error);

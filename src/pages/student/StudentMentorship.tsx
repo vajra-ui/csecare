@@ -22,7 +22,10 @@ export default function StudentMentorship() {
   const [message, setMessage] = useState('');
 
   const load = async () => {
-    const { data: al } = await supabase.from('alumni').select('*').order('graduation_year', { ascending: false });
+    const { data: al } = await supabase
+      .from('alumni')
+      .select('id, name, graduation_year, company, role, department, profile_image_url')
+      .order('graduation_year', { ascending: false });
     setAlumni(al || []);
     if (user?.studentId) {
       const { data: reqs } = await supabase.from('mentorship_requests').select('*, alumni(name, company, role)').eq('student_id', user.studentId).order('created_at', { ascending: false });
