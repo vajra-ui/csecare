@@ -28,24 +28,26 @@ export default function FacultyLoadBalancer() {
       setLoading(true);
       try {
         const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-        const [facRes, ttRes, subRes, menRes, subsRes] = await Promise.all([
+        const [facRes, ttRes, subRes, menRes, assignRes, submRes] = await Promise.all([
           supabase.from('faculty').select('id, name, faculty_id, is_tutor, section'),
           supabase.from('timetable').select('faculty_id'),
           supabase.from('substitute_allocations').select('substitute_faculty_id, date').gte('date', weekAgo),
           supabase.from('students').select('tutor_id'),
-          supabase.from('assignment_submissions').select('assignment_id, status, assignments(faculty_id)').eq('status','submitted'),
+          supabase.from('assignments').select('id, faculty_id'),
+          supabase.from('assignment_submissions').select('assignment_id, status').eq('status','submitted'),
         ]);
         const faculty = facRes.data ?? [];
         const tt = ttRes.data ?? [];
         const subs = subRes.data ?? [];
         const mentees = menRes.data ?? [];
-        const pending = subsRes.data ?? [];
+        const assignmentMap = new Map((assignRes.data ?? []).map((a: any) => [a.id, a.faculty_id]));
+        const pending = submRes.data ?? [];
 
         const rows: FacultyLoad[] = faculty.map((f: any) => {
           const hours = tt.filter((t: any) => t.faculty_id === f.id).length;
           const substitutions = subs.filter((s: any) => s.substitute_faculty_id === f.id).length;
           const menteeCount = mentees.filter((m: any) => m.tutor_id === f.id).length;
-          const pendingCorr = pending.filter((p: any) => p.assignments?.faculty_id === f.id).length;
+          const pendingCorr = pending.filter((p: any) => assignmentMap.get(p.assignment_id) === f.id).length;
           const loadScore = hours * 1.0 + substitutions * 1.5 + Math.min(menteeCount, 40) * 0.2 + pendingCorr * 0.3;
           let level: FacultyLoad['level'] = 'LOW';
           if (loadScore >= 30) level = 'OVERLOAD';
