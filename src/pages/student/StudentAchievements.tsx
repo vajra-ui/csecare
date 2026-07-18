@@ -161,35 +161,75 @@ export default function StudentAchievements() {
             <p>No achievements yet. Start building your portfolio!</p>
           </CardContent></Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {achievements.map(a => (
-              <Card key={a.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-2xl">{categoryIcons[a.category] || '⭐'}</span>
-                    <div className="flex gap-2">
-                      <Badge className={categoryColors[a.category] || ''} variant="outline">{a.category}</Badge>
-                      {a.verified && <Badge variant="secondary" className="text-green-700">✓ Verified</Badge>}
+          <Tabs defaultValue="grid" className="w-full">
+            <TabsList>
+              <TabsTrigger value="grid"><Trophy className="h-4 w-4 mr-1" /> Grid</TabsTrigger>
+              <TabsTrigger value="timeline"><Sparkles className="h-4 w-4 mr-1" /> Growth Timeline</TabsTrigger>
+            </TabsList>
+            <TabsContent value="grid" className="mt-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {achievements.map(a => (
+                  <Card key={a.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="text-2xl">{categoryIcons[a.category] || '⭐'}</span>
+                        <div className="flex gap-2">
+                          <Badge className={categoryColors[a.category] || ''} variant="outline">{a.category}</Badge>
+                          {a.verified && <Badge variant="secondary" className="text-green-700">✓ Verified</Badge>}
+                        </div>
+                      </div>
+                      <h3 className="font-semibold mb-1">{a.title}</h3>
+                      {a.description && <p className="text-sm text-muted-foreground mb-2">{a.description}</p>}
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString('en-IN')}</span>
+                        {a.certificate_url && (
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            const { data } = await supabase.storage.from('student-documents').createSignedUrl(a.certificate_url, 3600);
+                            if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                          }}>
+                            <Award className="h-3 w-3 mr-1" /> View Cert
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="timeline" className="mt-4">
+              <div className="relative pl-8 border-l-2 border-primary/30 space-y-8">
+                {timelineYears.map(yr => (
+                  <div key={yr} className="relative">
+                    <div className="absolute -left-[41px] top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center ring-4 ring-background">
+                      <Sparkles className="h-3 w-3 text-primary-foreground" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-primary mb-3">{yr}</h3>
+                    <div className="space-y-3">
+                      {timelineGroups[yr].map(a => (
+                        <Card key={a.id} className="hover:shadow-md transition">
+                          <CardContent className="pt-4 pb-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <span className="text-xl">{categoryIcons[a.category] || '⭐'}</span>
+                                <div>
+                                  <p className="font-semibold">{a.title}</p>
+                                  {a.description && <p className="text-xs text-muted-foreground mt-1">{a.description}</p>}
+                                  <p className="text-xs text-muted-foreground mt-1">{new Date(a.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
+                                </div>
+                              </div>
+                              {a.verified && <Badge variant="secondary" className="text-green-700">✓</Badge>}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   </div>
-                  <h3 className="font-semibold mb-1">{a.title}</h3>
-                  {a.description && <p className="text-sm text-muted-foreground mb-2">{a.description}</p>}
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString('en-IN')}</span>
-                    {a.certificate_url && (
-                      <Button variant="outline" size="sm" onClick={async () => {
-                        const { data } = await supabase.storage.from('student-documents').createSignedUrl(a.certificate_url, 3600);
-                        if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                      }}>
-                        <Award className="h-3 w-3 mr-1" /> View Cert
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
+
       </div>
     </StudentLayout>
   );
