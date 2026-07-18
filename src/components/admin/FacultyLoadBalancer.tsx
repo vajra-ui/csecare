@@ -28,12 +28,13 @@ export default function FacultyLoadBalancer() {
       setLoading(true);
       try {
         const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-        const facRes: any = await supabase.from('faculty').select('id, name, faculty_id, is_tutor, section');
-        const ttRes: any = await supabase.from('timetable').select('faculty_id');
-        const subRes: any = await supabase.from('substitute_allocations').select('substitute_faculty_id, date').gte('date', weekAgo);
-        const menRes: any = await supabase.from('students').select('tutor_id');
-        const assignRes: any = await supabase.from('assignments').select('id, faculty_id');
-        const submRes: any = await supabase.from('assignment_submissions').select('assignment_id, status').eq('status', 'submitted');
+        const sb: any = supabase;
+        const facRes: any = await sb.from('faculty').select('id, name, faculty_id, is_tutor, section');
+        const ttRes: any = await sb.from('timetable').select('faculty_id');
+        const subRes: any = await sb.from('substitute_allocations').select('substitute_faculty_id, date').gte('date', weekAgo);
+        const menRes: any = await sb.from('students').select('tutor_id');
+        const assignRes: any = await sb.from('assignments').select('id, faculty_id');
+        const submRes: any = await sb.from('assignment_submissions').select('assignment_id, status').eq('status', 'submitted');
         const faculty = facRes.data ?? [];
         const tt = ttRes.data ?? [];
         const subs = subRes.data ?? [];
