@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { adminLogin } from '@/lib/auth';
+import { tryOfflineLogin, isNetworkError } from '@/lib/offlineAuth';
 import { checkRateLimit, recordFailedAttempt, resetAttempts } from '@/lib/rateLimiter';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,7 +81,17 @@ export function AdminLogin() {
     }
 
     setLoading(true);
+    const offlineFirst = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
+      if (offlineFirst) {
+        const cached = await tryOfflineLogin('ADMIN', data.email, data.password);
+        if (!cached) throw new Error("You're offline and we don't have cached credentials for this account. Connect once online to enable offline login.");
+        resetAttempts();
+        await refreshUser();
+        toast({ title: 'Welcome back, Administrator!', description: 'Signed in offline from cached credentials.' });
+        setShowTransition(true);
+        return;
+      }
       await adminLogin(data.email, data.password);
       resetAttempts();
       await refreshUser();
@@ -90,6 +101,17 @@ export function AdminLogin() {
       });
       setShowTransition(true);
     } catch (error) {
+      if (isNetworkError(error)) {
+        const cached = await tryOfflineLogin('ADMIN', data.email, data.password);
+        if (cached) {
+          resetAttempts();
+          await refreshUser();
+          toast({ title: 'Welcome back, Administrator!', description: 'Network unavailable — signed in offline.' });
+          setShowTransition(true);
+          setLoading(false);
+          return;
+        }
+      }
       const result = recordFailedAttempt();
       if (result.locked) {
         setRateLimited(true);

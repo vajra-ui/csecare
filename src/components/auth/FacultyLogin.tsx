@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaavaiLogo } from '@/components/ui/PaavaiLogo';
 import { facultyLogin } from '@/lib/auth';
+import { tryOfflineLogin, isNetworkError } from '@/lib/offlineAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -45,15 +46,38 @@ export function FacultyLogin() {
 
   const onSubmit = async (data: FacultyLoginForm) => {
     setLoading(true);
+    const offlineFirst = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const tryCached = async () => {
+      // Faculty may have been cached as TUTOR or FACULTY — try both.
+      return (
+        (await tryOfflineLogin('TUTOR', data.facultyId, data.dob)) ||
+        (await tryOfflineLogin('FACULTY', data.facultyId, data.dob))
+      );
+    };
     try {
+      if (offlineFirst) {
+        const cached = await tryCached();
+        if (!cached) throw new Error("You're offline and we don't have cached credentials for this account. Connect once online to enable offline login.");
+        await refreshUser();
+        toast({ title: `Welcome back, ${cached.name}!`, description: 'Signed in offline from cached credentials.' });
+        setShowTransition(true);
+        return;
+      }
       const user = await facultyLogin(data.facultyId, data.dob);
       await refreshUser();
-      toast({
-        title: `Welcome, ${user.name}!`,
-        description: user.isTutor ? 'Logged in as Tutor' : 'Logged in as Faculty',
-      });
+      toast({ title: `Welcome, ${user.name}!`, description: user.isTutor ? 'Logged in as Tutor' : 'Logged in as Faculty' });
       setShowTransition(true);
     } catch (error) {
+      if (isNetworkError(error)) {
+        const cached = await tryCached();
+        if (cached) {
+          await refreshUser();
+          toast({ title: `Welcome back, ${cached.name}!`, description: 'Network unavailable — signed in offline.' });
+          setShowTransition(true);
+          setLoading(false);
+          return;
+        }
+      }
       toast({
         title: 'Login Failed',
         description: error instanceof Error ? error.message : 'Invalid credentials',

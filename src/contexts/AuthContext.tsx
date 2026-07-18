@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, getCurrentUser, logout as authLogout } from '@/lib/auth';
+import { getOfflineUser } from '@/lib/offlineAuth';
 import type { Session } from '@supabase/supabase-js';
 
 const WELCOME_QUOTES = [
@@ -45,25 +46,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async (): Promise<AuthUser | null> => {
     try {
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      return currentUser;
+      if (currentUser) {
+        setUser(currentUser);
+        return currentUser;
+      }
+      // No live session — fall back to a cached offline user if present.
+      const offline = getOfflineUser();
+      setUser(offline);
+      return offline;
     } catch (error) {
       console.error('Error refreshing user:', error);
-      setUser(null);
-      return null;
+      const offline = getOfflineUser();
+      setUser(offline);
+      return offline;
     }
   };
 
   useEffect(() => {
-    // Hydrate immediately from the cached session — avoids waiting on a full
-    // getCurrentUser() round-trip before the app can render.
+    // Instant hydrate from a cached offline user so protected routes render
+    // immediately (even if the Supabase network call is slow or offline).
+    const cached = getOfflineUser();
+    if (cached) setUser(cached);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
         refreshUser().finally(() => setLoading(false));
       } else {
+        if (!cached) setUser(null);
         setLoading(false);
       }
+    }).catch(() => {
+      // Network / Supabase unreachable — keep the offline user if we have one.
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -80,7 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } else {
-          setUser(null);
+          // No live session — keep any cached offline user for offline access.
+          const offline = getOfflineUser();
+          setUser(offline);
           setLoading(false);
         }
       }
